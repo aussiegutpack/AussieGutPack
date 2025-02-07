@@ -1,0 +1,42 @@
+export const sports = [
+  {
+    id: 1,
+    name: "Creatine",
+    description: "Something here about the product",
+    price: 39.99,
+    category: "Long Term",
+    benefits: ["Improve Digestion", "Boost Immunity", "Balance Gut Microbiome"],
+  },
+  {
+    id: 2,
+    name: "Beta-alanine",
+    description: "Something here about the product",
+    price: 39.99,
+    category: "Long Term",
+    benefits: ["Improve Digestion", "Boost Immunity", "Balance Gut Microbiome"],
+  },
+  {
+    id: 3,
+    name: "N1O1 Iozenge",
+    description: "Something here about the product",
+    price: 39.99,
+    category: "Long Term",
+    benefits: ["Improve Digestion", "Boost Immunity", "Balance Gut Microbiome"],
+  },
+  {
+    id: 4,
+    name: "Caffeine",
+    description: "Something here about the product",
+    price: 39.99,
+    category: "Long Term",
+    benefits: ["Improve Digestion", "Boost Immunity", "Balance Gut Microbiome"],
+  },
+  {
+    id: 5,
+    name: "Protein",
+    description: "Something here about the product",
+    price: 39.99,
+    category: "Long Term",
+    benefits: ["Improve Digestion", "Boost Immunity", "Balance Gut Microbiome"],
+  },
+];
