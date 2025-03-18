@@ -1,22 +1,32 @@
-import React from "react";
-import { ShoppingCart } from "lucide-react";
+import React, { useContext } from "react";
+import { ThemeContext } from "../App";
 
-function ProductCard({ product }) {
+const ProductCard = ({ product }) => {
+  const { isDarkMode } = useContext(ThemeContext);
+
   return (
-    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-      <h3 className="text-xl font-bold text-green-800 mb-2">{product.name}</h3>
-      <p className="text-gray-600 mb-4">{product.description}</p>
-      <div className="flex justify-between items-center">
-        <span className="text-lg font-semibold text-green-700">
-          ${product.price}
-        </span>
-        <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center">
-          <ShoppingCart className="mr-2" size={20} />
-          Add to Cart
-        </button>
-      </div>
+    <div
+      className={`p-4 rounded-lg shadow-md transition-colors duration-300 ease-in-out ${
+        isDarkMode ? "bg-gray-800 text-gray-300" : "bg-white text-gray-800"
+      }`}
+    >
+      <h3
+        className={`text-lg font-semibold transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-green-300" : "text-green-900"
+        }`}
+      >
+        {product.name}
+      </h3>
+      <p className="text-sm mt-2">{product.description}</p>
+      <p
+        className={`mt-2 font-medium transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-green-400" : "text-green-700"
+        }`}
+      >
+        ${product.price}
+      </p>
     </div>
   );
-}
+};
 
 export default ProductCard;

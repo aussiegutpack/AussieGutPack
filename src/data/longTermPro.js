@@ -2,10 +2,12 @@ export const longTermPro = [
   {
     id: 1,
     name: "Enterogermina",
-    description: "Something here about the product",
-    price: 39.99,
+    description:
+      "spore-forming probiotic that survives antibiotics and stomach acids, promoting gut health and recovery.",
+    price: "",
     category: "Long Term",
     benefits: ["Improve Digestion", "Boost Immunity", "Balance Gut Microbiome"],
+    url: "https://a.co/d/ePluKSI",
   },
   {
     id: 2,
