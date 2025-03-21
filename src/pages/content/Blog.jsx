@@ -1,7 +1,11 @@
-import React from "react";
+// src/pages/content/Blog.jsx
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { ThemeContext } from "../../App";
+import Card from "../../components/ui/Card";
 
 const Blog = () => {
+  const { isDarkMode } = useContext(ThemeContext);
   const blogPosts = [
     {
       id: "1",
@@ -27,18 +31,22 @@ const Blog = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Our Blog</h1>
+      <h1
+        className={`text-3xl font-bold mb-6 ${
+          isDarkMode ? "text-green-300" : "text-green-900"
+        }`}
+      >
+        Our Blog
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {blogPosts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition duration-300"
-          >
-            <Link to={`/blog/${post.id}`}>
-              <h2 className="text-xl font-semibold">{post.title}</h2>
-            </Link>
-            <p className="text-gray-600">{post.date}</p>
-          </div>
+          <Link to={`/blog/${post.id}`} key={post.id}>
+            <Card
+              title={post.title}
+              footer={post.date}
+              className="hover:shadow-lg transition-shadow duration-300 ease-in-out"
+            />
+          </Link>
         ))}
       </div>
     </div>

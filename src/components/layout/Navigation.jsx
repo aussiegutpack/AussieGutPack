@@ -1,7 +1,8 @@
+// src/components/layout/Navigation.jsx
 import React, { useState, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Dog } from "lucide-react";
-import { ThemeContext } from "../App";
+import { ThemeContext } from "../../App";
 
 function Navigation() {
   const location = useLocation();
@@ -15,6 +16,7 @@ function Navigation() {
     { name: "FAQ", href: "/faq" },
     { name: "Quiz", href: "/quiz" },
     { name: "Products", href: "/products" },
+    { name: "Contact", href: "/contact" },
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -22,9 +24,7 @@ function Navigation() {
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-20 shadow-md transition-colors duration-300 ease-in-out ${
-        isDarkMode
-          ? "bg-green-900 text-gray-300"
-          : "bg-green-200 text-green-900"
+        isDarkMode ? "bg-stone-900 text-stone-400" : "bg-white text-red-800"
       }`}
     >
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -36,17 +36,17 @@ function Navigation() {
           >
             <span
               className={`block w-6 h-1 mb-1.5 transition-all duration-300 ${
-                isDarkMode ? "bg-gray-300" : "bg-green-900"
+                isDarkMode ? "bg-stone-400" : "bg-red-800"
               } ${isMenuOpen ? "rotate-45 translate-y-2.5" : ""}`}
             />
             <span
               className={`block w-6 h-1 mb-1.5 transition-all duration-300 ${
-                isDarkMode ? "bg-gray-300" : "bg-green-900"
+                isDarkMode ? "bg-stone-400" : "bg-red-800"
               } ${isMenuOpen ? "opacity-0" : ""}`}
             />
             <span
               className={`block w-6 h-1 transition-all duration-300 ${
-                isDarkMode ? "bg-gray-300" : "bg-green-900"
+                isDarkMode ? "bg-stone-400" : "bg-red-800"
               } ${isMenuOpen ? "-rotate-45 -translate-y-2.5" : ""}`}
             />
           </button>
@@ -59,7 +59,7 @@ function Navigation() {
           >
             <Dog
               className={`w-6 h-6 ${
-                isDarkMode ? "text-gray-300" : "text-green-900"
+                isDarkMode ? "text-stone-400" : "text-red-800"
               }`}
             />
             <span className="text-xl font-bold">Aussie Gut Pack</span>
@@ -73,11 +73,11 @@ function Navigation() {
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 location.pathname === item.href
                   ? isDarkMode
-                    ? "bg-green-800 text-gray-300"
-                    : "bg-green-300 text-green-900"
+                    ? "bg-red-800 text-white"
+                    : "bg-red-100 text-red-800"
                   : isDarkMode
-                  ? "hover:bg-green-700"
-                  : "hover:bg-green-400"
+                  ? "hover:bg-red-900"
+                  : "hover:bg-red-200"
               }`}
             >
               {item.name}
@@ -87,8 +87,8 @@ function Navigation() {
             onClick={toggleTheme}
             className={`px-3 py-2 rounded-md transition-colors duration-200 ${
               isDarkMode
-                ? "bg-green-700 text-white hover:bg-green-600"
-                : "bg-green-500 text-white hover:bg-green-600"
+                ? "bg-red-800 text-white hover:bg-red-900"
+                : "bg-red-800 text-white hover:bg-red-900"
             }`}
           >
             {isDarkMode ? "Light" : "Dark"}
@@ -99,8 +99,8 @@ function Navigation() {
             onClick={toggleTheme}
             className={`px-3 py-1 rounded-md transition-colors duration-200 ${
               isDarkMode
-                ? "bg-green-700 text-white hover:bg-green-600"
-                : "bg-green-500 text-white hover:bg-green-600"
+                ? "bg-red-800 text-white hover:bg-red-900"
+                : "bg-red-800 text-white hover:bg-red-900"
             }`}
           >
             {isDarkMode ? "L" : "D"}
@@ -110,9 +110,7 @@ function Navigation() {
       {isMenuOpen && (
         <div
           className={`md:hidden flex flex-col space-y-2 py-4 px-6 transition-colors duration-300 ease-in-out ${
-            isDarkMode
-              ? "bg-green-900 text-gray-300"
-              : "bg-green-200 text-green-900"
+            isDarkMode ? "bg-stone-900 text-stone-400" : "bg-white text-red-800"
           }`}
         >
           {navItems.map((item) => (
@@ -122,11 +120,11 @@ function Navigation() {
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 location.pathname === item.href
                   ? isDarkMode
-                    ? "bg-green-800 text-gray-300"
-                    : "bg-green-300 text-green-900"
+                    ? "bg-red-800 text-white"
+                    : "bg-red-100 text-red-800"
                   : isDarkMode
-                  ? "hover:bg-green-700"
-                  : "hover:bg-green-400"
+                  ? "hover:bg-red-900"
+                  : "hover:bg-red-200"
               }`}
               onClick={() => setIsMenuOpen(false)}
             >

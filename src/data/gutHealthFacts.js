@@ -1,3 +1,4 @@
+// src/data/gutHealthFacts.js
 export const gutHealthFacts = [
   {
     id: 1,
@@ -55,5 +56,26 @@ export const gutHealthFacts = [
       "• Sun exposure and skin contact with nature\n" +
       "• Research-backed, third-party-tested supplements tailored to your needs",
     category: "Gut Microbiome Education",
+  },
+  {
+    id: 7,
+    title: "Boosts Cognition",
+    content:
+      "A healthy gut strengthens your immune system and helps fight off infections.",
+    category: "Benefits",
+  },
+  {
+    id: 8,
+    title: "Improves Digestion",
+    content:
+      "Proper gut health aids digestion, prevents bloating, and reduces stomach discomfort.",
+    category: "Benefits",
+  },
+  {
+    id: 9,
+    title: "Enhances Mental Health",
+    content:
+      "Your gut and brain are connected—good gut health can help reduce anxiety and improve mood.",
+    category: "Benefits",
   },
 ];

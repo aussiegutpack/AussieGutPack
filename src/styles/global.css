@@ -1,0 +1,120 @@
+/* src/styles/global.css */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css");
+
+/* Animation */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+/* Background Images */
+.background-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Ensure nothing spills out */
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 1s ease-in-out;
+}
+
+.background-image.active {
+  opacity: 1; /* Visible when active */
+}
+
+/* Light/Dark Mode */
+/* Light Mode (default) */
+.light-mode {
+  background-color: #ffffff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.blurred-section {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+  transition: background-color 0.3s ease;
+}
+
+/* Dark Mode */
+.dark-mode {
+  background-color: #1f2937;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark-mode .blurred-section {
+  background-color: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(5px);
+  transition: background-color 0.3s ease;
+}
+
+/* Navigation */
+/* Transition for the mobile menu */
+.mobile-menu-closed {
+  display: none;
+}
+
+.mobile-menu-open {
+  display: block;
+  transform: translateX(0);
+  transition: transform 0.3s ease-out;
+}
+
+/* Link hover transition */
+.nav-link {
+  transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  transform: scale(1.05);
+}
+
+/* Smooth hover for nav links */
+.nav-link:hover {
+  background-color: #2b6f2f; /* Darker green on hover */
+}
+
+/* Menu animation for mobile */
+@media (max-width: 1024px) {
+  .mobile-menu-closed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 110rem; /* Applies only at 2xl and above */
+  }
+}
+
+/* Global padding to clear fixed navbar */
+main {
+  padding-top: 4rem; /* Adjust based on navbar height (e.g., 64px = 4rem) */
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-top: 3.5rem; /* Reduce padding on smaller screens if navbar height adjusts */
+  }
+}
