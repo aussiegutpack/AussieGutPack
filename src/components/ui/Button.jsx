@@ -1,33 +1,20 @@
-// src/components/ui/Button.jsx
-import React, { useContext } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { ThemeContext } from "../../App";
 
-const Button = ({
-  to,
-  children,
-  variant = "primary",
-  className = "",
-  onClick,
-}) => {
-  const { isDarkMode } = useContext(ThemeContext);
+function Button({ to, children, variant, className, ...props }) {
   const baseStyles =
-    "px-6 py-3 rounded-lg text-white transition-colors duration-300 ease-in-out";
+    "px-4 py-2 rounded transition-colors duration-300 ease-in-out";
   const variantStyles =
     variant === "primary"
-      ? isDarkMode
-        ? "bg-gray-700 hover:bg-gray-600"
-        : "bg-green-600 hover:bg-green-700"
-      : isDarkMode
-      ? "bg-gray-600 hover:bg-gray-500"
-      : "bg-purple-600 hover:bg-purple-700";
+      ? "bg-red-800 text-white hover:bg-red-900"
+      : "bg-stone-200 text-red-600 hover:bg-stone-300";
 
   if (to) {
     return (
       <Link
         to={to}
         className={`${baseStyles} ${variantStyles} ${className}`}
-        onClick={onClick}
+        {...props}
       >
         {children}
       </Link>
@@ -37,11 +24,11 @@ const Button = ({
   return (
     <button
       className={`${baseStyles} ${variantStyles} ${className}`}
-      onClick={onClick}
+      {...props}
     >
       {children}
     </button>
   );
-};
+}
 
 export default Button;

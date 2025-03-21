@@ -10,11 +10,12 @@
     "preview": "vite preview",
     "tailwind": "tailwindcss",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "vite build && cp dist/index.html dist/404.html && gh-pages -d dist"
   },
   "dependencies": {
     "@shadcn/ui": "^0.0.4",
     "@tailwindcss/vite": "^4.0.3",
+    "firebase": "^11.5.0",
     "font-awesome": "^4.7.0",
     "framer-motion": "^12.5.0",
     "lucide-react": "^0.474.0",

@@ -1,4 +1,3 @@
-// src/pages/content/GutHealth.jsx
 import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../App";
@@ -8,12 +7,8 @@ import Card from "../../components/ui/Card";
 function GutHealth() {
   const { isDarkMode } = useContext(ThemeContext);
 
-  // Simulate a page load effect (optional)
-  useEffect(() => {
-    // Add animation or loading logic if needed
-  }, []);
+  useEffect(() => {});
 
-  // Split facts into "Why Gut Health Matters" (Benefits category) and others
   const whyGutHealthMattersFacts = gutHealthFacts.filter(
     (fact) => fact.category === "Benefits"
   );
@@ -23,30 +18,29 @@ function GutHealth() {
 
   return (
     <div
-      className="container mx-auto px-4 py-8 min-h-screen flex flex-col"
-      style={{ paddingTop: "4rem" }}
+      className={`container mx-auto px-4 py-8 min-h-screen flex flex-col ${
+        isDarkMode ? "bg-stone-900" : "bg-white"
+      }`}
     >
-      {/* Optional: Add a spacer div to ensure content clears the navbar */}
-      <div className="pt-16"></div>{" "}
-      {/* Adjust this value based on navbar height */}
+      <div className="pt-16"></div>
       <h1
-        className={`text-3xl font-bold mb-6 ${
-          isDarkMode ? "text-green-300" : "text-green-800"
+        className={`text-3xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-red-400" : "text-red-800"
         }`}
       >
         Understanding Gut Health
       </h1>
       <section className="mb-8 flex-grow">
         <h2
-          className={`text-2xl font-semibold mb-4 ${
-            isDarkMode ? "text-green-200" : "text-green-700"
+          className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
           }`}
         >
           What is Gut Health?
         </h2>
         <p
-          className={`text-gray-600 leading-relaxed ${
-            isDarkMode ? "text-gray-300" : "text-gray-600"
+          className={`leading-relaxed transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-white" : "text-red-600"
           }`}
         >
           Gut health refers to the balance and function of bacteria in the
@@ -55,8 +49,8 @@ function GutHealth() {
       </section>
       <section className="py-12 px-6 flex-grow">
         <h2
-          className={`text-3xl font-bold mb-6 ${
-            isDarkMode ? "text-green-300" : "text-green-800"
+          className={`text-3xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
           }`}
         >
           Why Gut Health Matters
@@ -75,8 +69,8 @@ function GutHealth() {
       </section>
       <section className="flex-grow">
         <h2
-          className={`text-2xl font-semibold mb-4 ${
-            isDarkMode ? "text-green-200" : "text-green-700"
+          className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
           }`}
         >
           Gut Health Facts
@@ -88,9 +82,9 @@ function GutHealth() {
                 title={fact.title}
                 content={fact.content}
                 footer={`Category: ${fact.category}`}
-                className={`${
-                  isDarkMode ? "bg-gray-700" : "bg-green-50"
-                } border-l-4 border-green-500 hover:shadow-lg transition-shadow duration-300 ease-in-out`}
+                className={`border-l-4 border-red-500 hover:shadow-lg transition-shadow duration-300 ease-in-out ${
+                  isDarkMode ? "bg-stone-800" : "bg-stone-50"
+                }`}
               />
             </Link>
           ))}

@@ -11,7 +11,7 @@ function Navigation() {
 
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "Gut Health", href: "/gut-health" },
+
     { name: "Blog", href: "/blog" },
     { name: "FAQ", href: "/faq" },
     { name: "Quiz", href: "/quiz" },
@@ -24,7 +24,7 @@ function Navigation() {
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-20 shadow-md transition-colors duration-300 ease-in-out ${
-        isDarkMode ? "bg-stone-900 text-stone-400" : "bg-white text-red-800"
+        isDarkMode ? "bg-stone-900 text-red-400" : "bg-white text-red-800"
       }`}
     >
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">

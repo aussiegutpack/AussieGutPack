@@ -1,4 +1,3 @@
-// src/pages/content/BlogPost.jsx
 import React, { useContext } from "react";
 import { useParams } from "react-router-dom";
 import { ThemeContext } from "../../App";
@@ -39,15 +38,23 @@ const BlogPost = () => {
 
   if (!post) {
     return (
-      <div className="container mx-auto p-6">
+      <div
+        className={`min-h-screen container mx-auto p-6 ${
+          isDarkMode ? "bg-stone-900" : "bg-white"
+        }`}
+      >
         <h1
-          className={`text-3xl font-bold mb-6 ${
-            isDarkMode ? "text-green-300" : "text-green-900"
+          className={`text-3xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
           }`}
         >
           Post Not Found
         </h1>
-        <Button to="/blog" variant="primary">
+        <Button
+          to="/blog"
+          variant="primary"
+          className="bg-red-800 text-white hover:bg-red-900 transition-colors duration-300 ease-in-out"
+        >
           Back to Blog
         </Button>
       </div>
@@ -55,29 +62,37 @@ const BlogPost = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div
+      className={`min-h-screen container mx-auto p-6 ${
+        isDarkMode ? "bg-stone-900" : "bg-white"
+      }`}
+    >
       <h1
-        className={`text-3xl font-bold mb-4 ${
-          isDarkMode ? "text-green-300" : "text-green-900"
+        className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-red-400" : "text-red-800"
         }`}
       >
         {post.title}
       </h1>
       <p
-        className={`text-gray-600 mb-4 ${
-          isDarkMode ? "text-gray-400" : "text-gray-600"
+        className={`mb-4 transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-white" : "text-red-600"
         }`}
       >
         {post.date}
       </p>
       <p
-        className={`text-lg mb-6 ${
-          isDarkMode ? "text-gray-300" : "text-gray-800"
+        className={`text-lg mb-6 transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-white" : "text-red-600"
         }`}
       >
         {post.content}
       </p>
-      <Button to="/blog" variant="primary">
+      <Button
+        to="/blog"
+        variant="primary"
+        className="bg-red-800 text-white hover:bg-red-900 transition-colors duration-300 ease-in-out"
+      >
         Back to Blog
       </Button>
     </div>

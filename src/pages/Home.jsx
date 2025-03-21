@@ -4,6 +4,8 @@ import { ThemeContext } from "../App";
 import Button from "../components/ui/Button";
 import Background from "../components/layout/Background";
 import { motion, AnimatePresence } from "framer-motion";
+import { db } from "../firebase"; // Import Firebase setup
+import { doc, getDoc } from "firebase/firestore"; // Firestore functions
 
 function Home() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -11,19 +13,49 @@ function Home() {
   const headerRef = useRef(null);
   const roofRef = useRef(null);
 
-  const [isHeaderVisible, setIsHeaderVisible] = React.useState(false);
-  const [isRoofVisible, setIsRoofVisible] = React.useState(false);
-
-  const quotes = [
-    "An athlete won't judge you for working out.",
-    "A millionaire won't judge you for starting a business.",
-    "A musician won't judge you for trying to sing a song.",
-    "It's always the people going nowhere that have something to say.",
-    "Idle hands do the devil's work",
-  ];
-
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false); // Changed to useState
+  const [isRoofVisible, setIsRoofVisible] = useState(false); // Changed to useState
+  const [content, setContent] = useState({
+    quotes: [],
+    dailyFitnessBoost: { description: "", exercises: [] },
+  });
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
 
+  // Fetch content from Firestore on mount
+  useEffect(() => {
+    const fetchContent = async () => {
+      const docRef = doc(db, "content", "home");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setContent(docSnap.data());
+      } else {
+        // Default content if Firestore is empty
+        setContent({
+          quotes: [
+            "An athlete won't judge you for working out.",
+            "A millionaire won't judge you for starting a business.",
+            "A musician won't judge you for trying to sing a song.",
+            "It's always the people going nowhere that have something to say.",
+            "Idle hands do the devil's work",
+          ],
+          dailyFitnessBoost: {
+            description:
+              "A quick 20-minute routine to kickstart your metabolism and improve digestion.",
+            exercises: [
+              "5-minute brisk walk or jog",
+              "3 sets of 15 squats",
+              "3 sets of 10 push-ups",
+              "2 sets of 20 jumping jacks",
+              "1-minute plank hold",
+            ],
+          },
+        });
+      }
+    };
+    fetchContent();
+  }, []);
+
+  // Intersection Observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -45,26 +77,16 @@ function Home() {
     };
   }, []);
 
+  // Quote rotation
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentQuoteIndex((prevIndex) => (prevIndex + 1) % quotes.length);
+      setCurrentQuoteIndex(
+        (prevIndex) => (prevIndex + 1) % content.quotes.length
+      );
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [quotes.length]);
-
-  const dailyFitnessBoost = {
-    title: "Full-Body Energizer",
-    description:
-      "A quick 20-minute routine to kickstart your metabolism and improve digestion.",
-    exercises: [
-      "5-minute brisk walk or jog",
-      "3 sets of 15 squats",
-      "3 sets of 10 push-ups",
-      "2 sets of 20 jumping jacks",
-      "1-minute plank hold",
-    ],
-  };
+  }, [content.quotes.length]);
 
   const quoteVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -90,14 +112,14 @@ function Home() {
         <div className="container mx-auto text-center">
           <h1
             className={`text-5xl md:text-6xl font-extrabold mb-4 transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-stone-400" : "text-red-800"
+              isDarkMode ? "text-red-400" : "text-red-800"
             }`}
           >
             Welcome to Aussie Gut Pack
           </h1>
           <p
             className={`text-xl md:text-2xl max-w-2xl mx-auto mb-8 transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-white" : "text-stone-600"
+              isDarkMode ? "text-white" : "text-red-600"
             }`}
           >
             Empowering Your Digestive Health, Naturally.
@@ -113,14 +135,14 @@ function Home() {
             <div className="md:w-1/2 p-6 flex flex-col justify-center">
               <h2
                 className={`text-3xl md:text-4xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-stone-400" : "text-red-800"
+                  isDarkMode ? "text-red-400" : "text-red-800"
                 }`}
               >
                 About Us
               </h2>
               <p
                 className={`text-lg transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-stone-600"
+                  isDarkMode ? "text-white" : "text-red-600"
                 }`}
               >
                 We are dedicated to bringing you information about Australian
@@ -164,7 +186,7 @@ function Home() {
         >
           <h2
             className={`text-3xl md:text-4xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-stone-400" : "text-red-800"
+              isDarkMode ? "text-red-400" : "text-red-800"
             }`}
           >
             Wisdom to Win The Day
@@ -178,26 +200,26 @@ function Home() {
                 animate="visible"
                 exit="exit"
                 className={`text-lg italic mb-6 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-stone-600"
+                  isDarkMode ? "text-white" : "text-red-600"
                 }`}
               >
-                "{quotes[currentQuoteIndex]}"
+                "{content.quotes[currentQuoteIndex]}"
               </motion.p>
             </AnimatePresence>
           </div>
           <p
             className={`text-lg mb-6 max-w-3xl mx-auto transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-white" : "text-stone-600"
+              isDarkMode ? "text-white" : "text-red-600"
             }`}
           >
-            {dailyFitnessBoost.description}
+            {content.dailyFitnessBoost.description}
           </p>
           <ul
-            className={`text-left list-disc list-inside mb-8 max-w-md mx-auto transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-white" : "text-stone-600"
+            className={`text-left list-disc pl-6 mb-8 max-w-md mx-auto transition-colors duration-300 ease-in-out ${
+              isDarkMode ? "text-white" : "text-red-600"
             }`}
           >
-            {dailyFitnessBoost.exercises.map((exercise, index) => (
+            {content.dailyFitnessBoost.exercises.map((exercise, index) => (
               <li key={index} className="mb-2 text-lg">
                 {exercise}
               </li>

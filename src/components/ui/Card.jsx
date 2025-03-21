@@ -1,38 +1,43 @@
-// src/components/ui/Card.jsx
-import React, { useContext } from "react";
+import React from "react";
+import { useContext } from "react";
 import { ThemeContext } from "../../App";
 
-const Card = ({ title, content, footer, onClick, className = "" }) => {
+function Card({ title, content, footer, className }) {
   const { isDarkMode } = useContext(ThemeContext);
 
   return (
     <div
-      className={`p-4 rounded-lg shadow-md transition-shadow duration-300 ease-in-out ${
-        isDarkMode ? "bg-gray-800 text-gray-300" : "bg-white text-gray-800"
+      className={`p-4 border rounded-lg shadow-md ${
+        isDarkMode ? "bg-stone-800 border-stone-700" : "bg-white border-red-300"
       } ${className}`}
-      onClick={onClick}
     >
-      {title && (
-        <h3
-          className={`text-lg font-semibold ${
-            isDarkMode ? "text-green-300" : "text-green-900"
+      <h3
+        className={`text-xl font-semibold transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-red-400" : "text-red-800"
+        }`}
+      >
+        {title}
+      </h3>
+      {content && (
+        <p
+          className={`mt-2 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-white" : "text-red-600"
           }`}
         >
-          {title}
-        </h3>
+          {content}
+        </p>
       )}
-      {content && <p className="text-sm mt-2">{content}</p>}
       {footer && (
-        <div
-          className={`mt-2 font-medium ${
-            isDarkMode ? "text-green-400" : "text-green-700"
+        <p
+          className={`mt-2 text-sm transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-white" : "text-red-600"
           }`}
         >
           {footer}
-        </div>
+        </p>
       )}
     </div>
   );
-};
+}
 
 export default Card;

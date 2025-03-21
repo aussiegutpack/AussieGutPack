@@ -1,10 +1,8 @@
-// src/pages/content/Contact.jsx
-import React, { useState } from "react";
-import { ThemeContext } from "../../App"; // Fixed path
+import React, { useState, useContext } from "react";
+import { ThemeContext } from "../../App";
 
 function Contact() {
-  const { isDarkMode } = React.useContext(ThemeContext);
-
+  const { isDarkMode } = useContext(ThemeContext);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,35 +17,42 @@ function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // For now, log the form data to the console (replace with email service later)
     console.log("Form submitted:", formData);
     setStatus("Thank you! Your inquiry has been received.");
-    // Reset form
     setFormData({ name: "", email: "", message: "" });
-    setTimeout(() => setStatus(""), 3000); // Clear status after 3 seconds
+    setTimeout(() => setStatus(""), 3000);
   };
 
   return (
     <div
       className={`min-h-screen py-12 px-4 ${
-        isDarkMode ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-800"
+        isDarkMode ? "bg-stone-900" : "bg-white"
       }`}
     >
       <div className="max-w-2xl mx-auto">
         <h1
-          className={`text-4xl md:text-5xl font-bold mb-6 ${
-            isDarkMode ? "text-purple-300" : "text-purple-900"
+          className={`text-4xl md:text-5xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
           }`}
         >
           Contact Us
         </h1>
-        <p className="mb-8">
+        <p
+          className={`mb-8 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-white" : "text-red-600"
+          }`}
+        >
           Have any questions or inquiries? Fill out the form below, and we'll
           get back to you as soon as possible!
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="name"
+              className={`block text-sm font-medium mb-2 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-white" : "text-red-600"
+              }`}
+            >
               Name
             </label>
             <input
@@ -59,14 +64,19 @@ function Contact() {
               required
               className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                 isDarkMode
-                  ? "bg-gray-800 border-gray-700 text-gray-300 focus:ring-purple-500"
-                  : "bg-white border-gray-300 text-gray-800 focus:ring-purple-500"
+                  ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
+                  : "bg-white border-red-300 text-red-600 focus:ring-red-500"
               }`}
               placeholder="Your Name"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="email"
+              className={`block text-sm font-medium mb-2 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-white" : "text-red-600"
+              }`}
+            >
               Email
             </label>
             <input
@@ -78,14 +88,19 @@ function Contact() {
               required
               className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                 isDarkMode
-                  ? "bg-gray-800 border-gray-700 text-gray-300 focus:ring-purple-500"
-                  : "bg-white border-gray-300 text-gray-800 focus:ring-purple-500"
+                  ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
+                  : "bg-white border-red-300 text-red-600 focus:ring-red-500"
               }`}
               placeholder="your@email.com"
             />
           </div>
           <div>
-            <label htmlFor="message" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="message"
+              className={`block text-sm font-medium mb-2 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-white" : "text-red-600"
+              }`}
+            >
               Message
             </label>
             <textarea
@@ -97,23 +112,27 @@ function Contact() {
               rows="5"
               className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                 isDarkMode
-                  ? "bg-gray-800 border-gray-700 text-gray-300 focus:ring-purple-500"
-                  : "bg-white border-gray-300 text-gray-800 focus:ring-purple-500"
+                  ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
+                  : "bg-white border-red-300 text-red-600 focus:ring-red-500"
               }`}
               placeholder="Your inquiry or message..."
             />
           </div>
           <button
             type="submit"
-            className={`w-full py-2 px-4 rounded-md font-semibold transition-colors duration-300 ${
-              isDarkMode
-                ? "bg-purple-600 text-white hover:bg-purple-700"
-                : "bg-purple-600 text-white hover:bg-purple-700"
-            }`}
+            className="bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 transition-colors duration-300 ease-in-out w-full"
           >
             Send Message
           </button>
-          {status && <p className="mt-4 text-center">{status}</p>}
+          {status && (
+            <p
+              className={`mt-4 text-center transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-white" : "text-red-600"
+              }`}
+            >
+              {status}
+            </p>
+          )}
         </form>
       </div>
     </div>

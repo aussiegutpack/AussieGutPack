@@ -1,4 +1,3 @@
-// src/pages/content/Blog.jsx
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../App";
@@ -30,10 +29,14 @@ const Blog = () => {
   ];
 
   return (
-    <div className="container mx-auto p-6">
+    <div
+      className={`min-h-screen container mx-auto p-6 ${
+        isDarkMode ? "bg-stone-900" : "bg-white"
+      }`}
+    >
       <h1
-        className={`text-3xl font-bold mb-6 ${
-          isDarkMode ? "text-green-300" : "text-green-900"
+        className={`text-3xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+          isDarkMode ? "text-red-400" : "text-red-800"
         }`}
       >
         Our Blog
