@@ -4,58 +4,95 @@ import { ThemeContext } from "../App";
 import Button from "../components/ui/Button";
 import Background from "../components/layout/Background";
 import { motion, AnimatePresence } from "framer-motion";
-import { db } from "../firebase"; // Import Firebase setup
-import { doc, getDoc } from "firebase/firestore"; // Firestore functions
+import { db } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 function Home() {
   const { isDarkMode } = useContext(ThemeContext);
-
   const headerRef = useRef(null);
   const roofRef = useRef(null);
 
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false); // Changed to useState
-  const [isRoofVisible, setIsRoofVisible] = useState(false); // Changed to useState
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const [isRoofVisible, setIsRoofVisible] = useState(false);
   const [content, setContent] = useState({
     quotes: [],
-    dailyFitnessBoost: { description: "", exercises: [] },
+    currentWorkout: { description: "", exercises: [] },
+    scheduledWorkouts: [],
+    lastUpdated: null,
   });
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
 
-  // Fetch content from Firestore on mount
   useEffect(() => {
-    const fetchContent = async () => {
+    const fetchAndUpdateContent = async () => {
       const docRef = doc(db, "content", "home");
       const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setContent(docSnap.data());
-      } else {
-        // Default content if Firestore is empty
-        setContent({
-          quotes: [
-            "An athlete won't judge you for working out.",
-            "A millionaire won't judge you for starting a business.",
-            "A musician won't judge you for trying to sing a song.",
-            "It's always the people going nowhere that have something to say.",
-            "Idle hands do the devil's work",
+
+      let newContent = {
+        quotes: [
+          "An athlete won't judge you for working out.",
+          "A millionaire won't judge you for starting a business.",
+          "A musician won't judge you for trying to sing a song.",
+          "It's always the people going nowhere that have something to say.",
+          "Idle hands do the devil's work",
+        ],
+        currentWorkout: {
+          description:
+            "A quick 20-minute routine to kickstart your metabolism and improve digestion.",
+          exercises: [
+            "5-minute brisk walk or jog",
+            "3 sets of 15 squats",
+            "3 sets of 10 push-ups",
+            "2 sets of 20 jumping jacks",
+            "1-minute plank hold",
           ],
-          dailyFitnessBoost: {
-            description:
-              "A quick 20-minute routine to kickstart your metabolism and improve digestion.",
-            exercises: [
-              "5-minute brisk walk or jog",
-              "3 sets of 15 squats",
-              "3 sets of 10 push-ups",
-              "2 sets of 20 jumping jacks",
-              "1-minute plank hold",
-            ],
-          },
-        });
+        },
+        scheduledWorkouts: [],
+        lastUpdated: null,
+      };
+
+      if (docSnap.exists()) {
+        newContent = { ...newContent, ...docSnap.data() };
       }
+
+      const now = new Date();
+      const updatedScheduledWorkouts = [...newContent.scheduledWorkouts];
+      let shouldUpdate = false;
+
+      // Sort scheduled workouts by date/time
+      updatedScheduledWorkouts.sort(
+        (a, b) => new Date(a.updateDateTime) - new Date(b.updateDateTime)
+      );
+
+      // Check if any scheduled workout should replace the current one
+      if (updatedScheduledWorkouts.length > 0) {
+        const nextWorkout = updatedScheduledWorkouts[0];
+        const nextUpdateTime = new Date(nextWorkout.updateDateTime);
+        if (
+          now >= nextUpdateTime &&
+          (!newContent.lastUpdated ||
+            new Date(newContent.lastUpdated) < nextUpdateTime)
+        ) {
+          newContent.currentWorkout = {
+            description: nextWorkout.description,
+            exercises: nextWorkout.exercises,
+          };
+          updatedScheduledWorkouts.shift(); // Remove the used workout
+          newContent.scheduledWorkouts = updatedScheduledWorkouts;
+          newContent.lastUpdated = now.toISOString();
+          shouldUpdate = true;
+        }
+      }
+
+      if (shouldUpdate) {
+        await setDoc(docRef, newContent, { merge: true });
+      }
+
+      setContent(newContent);
     };
-    fetchContent();
+
+    fetchAndUpdateContent();
   }, []);
 
-  // Intersection Observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -77,7 +114,6 @@ function Home() {
     };
   }, []);
 
-  // Quote rotation
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentQuoteIndex(
@@ -104,7 +140,6 @@ function Home() {
         isDarkMode ? "bg-stone-900" : "bg-white"
       }`}
     >
-      {/* Header Section: Welcome to Aussie Gut Pack with About and Background */}
       <section
         ref={headerRef}
         className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
@@ -131,7 +166,6 @@ function Home() {
                 : "opacity-0 translate-y-10"
             }`}
           >
-            {/* Left Half: About Section */}
             <div className="md:w-1/2 p-6 flex flex-col justify-center">
               <h2
                 className={`text-3xl md:text-4xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
@@ -162,7 +196,6 @@ function Home() {
                 Learn More
               </Button>
             </div>
-            {/* Right Half: Background/Rotating Images */}
             <div className="md:w-1/2 flex justify-center items-center">
               <div className="h-80 w-80 md:h-[400px] md:w-[400px] overflow-hidden relative rounded-full">
                 <Background className="w-full h-full object-cover" />
@@ -172,7 +205,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Section: Wisdom 2 Win The Day */}
       <section
         ref={roofRef}
         className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
@@ -207,19 +239,26 @@ function Home() {
               </motion.p>
             </AnimatePresence>
           </div>
+          <h3
+            className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+              isDarkMode ? "text-red-400" : "text-red-800"
+            }`}
+          >
+            Workout of the Day
+          </h3>
           <p
             className={`text-lg mb-6 max-w-3xl mx-auto transition-colors duration-300 ease-in-out ${
               isDarkMode ? "text-white" : "text-red-600"
             }`}
           >
-            {content.dailyFitnessBoost.description}
+            {content.currentWorkout.description}
           </p>
           <ul
             className={`text-left list-disc pl-6 mb-8 max-w-md mx-auto transition-colors duration-300 ease-in-out ${
               isDarkMode ? "text-white" : "text-red-600"
             }`}
           >
-            {content.dailyFitnessBoost.exercises.map((exercise, index) => (
+            {content.currentWorkout.exercises.map((exercise, index) => (
               <li key={index} className="mb-2 text-lg">
                 {exercise}
               </li>

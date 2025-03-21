@@ -1,40 +1,55 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ThemeContext } from "../../App";
 import Button from "../../components/ui/Button";
+import { db } from "../../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const BlogPost = () => {
   const { id } = useParams();
   const { isDarkMode } = useContext(ThemeContext);
+  const [post, setPost] = useState(null);
 
-  const blogPosts = [
-    {
-      id: "1",
-      title: "The Importance of Gut Health",
-      date: "January 15, 2025",
-      content: "Gut health is crucial for overall well-being...",
-    },
-    {
-      id: "2",
-      title: "How to Maintain a Healthy Gut",
-      date: "February 3, 2025",
-      content: "Maintaining a healthy gut involves a diet rich in fiber...",
-    },
-    {
-      id: "3",
-      title: "The Role of Fiber in Maintaining Gut Health",
-      date: "December 15, 2024",
-      content: "Fiber acts as fuel for gut bacteria...",
-    },
-    {
-      id: "4",
-      title: "Why Gut Health Affects Your Immune System",
-      date: "November 10, 2024",
-      content: "A healthy gut strengthens your immune system...",
-    },
-  ];
-
-  const post = blogPosts.find((p) => p.id === id);
+  useEffect(() => {
+    const fetchPost = async () => {
+      const postDocRef = doc(db, "content", "blog", "posts", id);
+      const postDocSnap = await getDoc(postDocRef);
+      if (postDocSnap.exists()) {
+        setPost({ id: postDocSnap.id, ...postDocSnap.data() });
+      } else {
+        // Fallback to hardcoded if not in Firestore yet
+        const fallbackPosts = [
+          {
+            id: "1",
+            title: "The Importance of Gut Health",
+            date: "January 15, 2025",
+            content: "Gut health is crucial for overall well-being...",
+          },
+          {
+            id: "2",
+            title: "How to Maintain a Healthy Gut",
+            date: "February 3, 2025",
+            content:
+              "Maintaining a healthy gut involves a diet rich in fiber...",
+          },
+          {
+            id: "3",
+            title: "The Role of Fiber in Maintaining Gut Health",
+            date: "December 15, 2024",
+            content: "Fiber acts as fuel for gut bacteria...",
+          },
+          {
+            id: "4",
+            title: "Why Gut Health Affects Your Immune System",
+            date: "November 10, 2024",
+            content: "A healthy gut strengthens your immune system...",
+          },
+        ];
+        setPost(fallbackPosts.find((p) => p.id === id) || null);
+      }
+    };
+    fetchPost();
+  }, [id]);
 
   if (!post) {
     return (
