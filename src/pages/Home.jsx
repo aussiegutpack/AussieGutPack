@@ -18,6 +18,7 @@ function Home() {
     quotes: [],
     currentWorkout: { description: "", exercises: [] },
     scheduledWorkouts: [],
+    aboutUs: "",
     lastUpdated: null,
   });
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
@@ -47,6 +48,8 @@ function Home() {
           ],
         },
         scheduledWorkouts: [],
+        aboutUs:
+          "We are dedicated to bringing you information about Australian Shepherds and how to maintain a healthy gut. Our mission is to educate and inspire a natural approach to wellness for you and your furry friends.",
         lastUpdated: null,
       };
 
@@ -58,12 +61,10 @@ function Home() {
       const updatedScheduledWorkouts = [...newContent.scheduledWorkouts];
       let shouldUpdate = false;
 
-      // Sort scheduled workouts by date/time
       updatedScheduledWorkouts.sort(
         (a, b) => new Date(a.updateDateTime) - new Date(b.updateDateTime)
       );
 
-      // Check if any scheduled workout should replace the current one
       if (updatedScheduledWorkouts.length > 0) {
         const nextWorkout = updatedScheduledWorkouts[0];
         const nextUpdateTime = new Date(nextWorkout.updateDateTime);
@@ -76,7 +77,7 @@ function Home() {
             description: nextWorkout.description,
             exercises: nextWorkout.exercises,
           };
-          updatedScheduledWorkouts.shift(); // Remove the used workout
+          updatedScheduledWorkouts.shift();
           newContent.scheduledWorkouts = updatedScheduledWorkouts;
           newContent.lastUpdated = now.toISOString();
           shouldUpdate = true;
@@ -179,10 +180,7 @@ function Home() {
                   isDarkMode ? "text-white" : "text-red-600"
                 }`}
               >
-                We are dedicated to bringing you information about Australian
-                Shepherds and how to maintain a healthy gut. Our mission is to
-                educate and inspire a natural approach to wellness for you and
-                your furry friends.
+                {content.aboutUs}
               </p>
               <Button
                 to="/fitness-tips"

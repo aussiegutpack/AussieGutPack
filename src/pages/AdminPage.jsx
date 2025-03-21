@@ -19,6 +19,7 @@ function AdminPage() {
   const [workoutDesc, setWorkoutDesc] = useState("");
   const [exercises, setExercises] = useState([""]);
   const [scheduledWorkouts, setScheduledWorkouts] = useState([]);
+  const [aboutUs, setAboutUs] = useState("");
   const [blogPosts, setBlogPosts] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ function AdminPage() {
             setScheduledWorkouts(
               data.scheduledWorkouts?.length ? data.scheduledWorkouts : []
             );
+            setAboutUs(data.aboutUs || "");
           }
 
           const blogCollectionRef = collection(db, "content", "blog", "posts");
@@ -84,6 +86,7 @@ function AdminPage() {
           workout.exercises.length > 0 &&
           workout.updateDateTime.trim()
       ),
+      aboutUs: aboutUs.trim(),
       lastUpdated: new Date().toISOString(),
     };
 
@@ -274,6 +277,26 @@ function AdminPage() {
         >
           Add Quote
         </button>
+      </div>
+
+      <div className="mb-6">
+        <h3
+          className={`text-xl transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
+          } mb-2`}
+        >
+          About Us
+        </h3>
+        <textarea
+          value={aboutUs}
+          onChange={(e) => setAboutUs(e.target.value)}
+          className={`border p-2 w-full h-24 ${
+            isDarkMode
+              ? "bg-stone-700 border-stone-600 text-white"
+              : "bg-white border-red-300 text-red-600"
+          }`}
+          placeholder="About Us text"
+        />
       </div>
 
       <div className="mb-6">
