@@ -1,3 +1,4 @@
+// src/pages/content/BlogPost.js
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ThemeContext } from "../../App";
@@ -23,26 +24,26 @@ const BlogPost = () => {
             id: "1",
             title: "The Importance of Gut Health",
             date: "January 15, 2025",
-            content: "Gut health is crucial for overall well-being...",
-          },
-          {
-            id: "2",
-            title: "How to Maintain a Healthy Gut",
-            date: "February 3, 2025",
-            content:
-              "Maintaining a healthy gut involves a diet rich in fiber...",
-          },
-          {
-            id: "3",
-            title: "The Role of Fiber in Maintaining Gut Health",
-            date: "December 15, 2024",
-            content: "Fiber acts as fuel for gut bacteria...",
-          },
-          {
-            id: "4",
-            title: "Why Gut Health Affects Your Immune System",
-            date: "November 10, 2024",
-            content: "A healthy gut strengthens your immune system...",
+            blocks: [
+              {
+                type: "paragraph",
+                content:
+                  "Gut health is crucial for overall well-being. It affects digestion, immunity, and even mental health.",
+              },
+              {
+                type: "list",
+                content: [
+                  "Eat a balanced diet.",
+                  "Stay hydrated.",
+                  "Get regular exercise.",
+                ],
+              },
+              {
+                type: "paragraph",
+                content:
+                  "A healthy gut can prevent chronic diseases and improve your quality of life.",
+              },
+            ],
           },
         ];
         setPost(fallbackPosts.find((p) => p.id === id) || null);
@@ -96,13 +97,33 @@ const BlogPost = () => {
       >
         {post.date}
       </p>
-      <p
+      <div
         className={`text-lg mb-6 transition-colors duration-300 ease-in-out ${
           isDarkMode ? "text-white" : "text-red-600"
         }`}
       >
-        {post.content}
-      </p>
+        {post.blocks && post.blocks.length > 0 ? (
+          post.blocks.map((block, index) => (
+            <div key={index} className="mb-4">
+              {block.type === "paragraph" ? (
+                <p>{block.content}</p>
+              ) : block.type === "list" && Array.isArray(block.content) ? (
+                <ol className="list-decimal pl-6">
+                  {block.content.map((item, itemIndex) => (
+                    <li key={itemIndex} className="mb-2">
+                      {item}
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p>Invalid block format</p>
+              )}
+            </div>
+          ))
+        ) : (
+          <p>No content available.</p>
+        )}
+      </div>
       <Button
         to="/blog"
         variant="primary"

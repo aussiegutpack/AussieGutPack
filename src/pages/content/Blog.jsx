@@ -1,3 +1,4 @@
+// src/pages/content/Blog.js
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../App";
@@ -18,60 +19,50 @@ const Blog = () => {
         const blogSnapshot = await getDocs(blogCollectionRef);
         const blogData = blogSnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          title: doc.data().title,
+          date: doc.data().date,
+          blocks: doc.data().blocks || [{ type: "paragraph", content: "" }],
         }));
-        console.log("Fetched blog posts:", blogData); // Debug log
+        console.log("Fetched blog posts:", blogData);
         if (blogData.length > 0) {
           setBlogPosts(blogData);
         } else {
-          // Fallback to hardcoded data if Firestore is empty
           setBlogPosts([
             {
               id: "1",
               title: "The Importance of Gut Health",
               date: "January 15, 2025",
-            },
-            {
-              id: "2",
-              title: "How to Maintain a Healthy Gut",
-              date: "February 3, 2025",
-            },
-            {
-              id: "3",
-              title: "The Role of Fiber in Maintaining Gut Health",
-              date: "December 15, 2024",
-            },
-            {
-              id: "4",
-              title: "Why Gut Health Affects Your Immune System",
-              date: "November 10, 2024",
+              blocks: [
+                {
+                  type: "paragraph",
+                  content: "Gut health is crucial for overall well-being...",
+                },
+                {
+                  type: "list",
+                  content: ["Eat well", "Stay active"],
+                },
+              ],
             },
           ]);
         }
       } catch (err) {
         console.error("Error fetching blog posts:", err);
         setError("Failed to load blog posts: " + err.message);
-        // Use fallback data on error
         setBlogPosts([
           {
             id: "1",
             title: "The Importance of Gut Health",
             date: "January 15, 2025",
-          },
-          {
-            id: "2",
-            title: "How to Maintain a Healthy Gut",
-            date: "February 3, 2025",
-          },
-          {
-            id: "3",
-            title: "The Role of Fiber in Maintaining Gut Health",
-            date: "December 15, 2024",
-          },
-          {
-            id: "4",
-            title: "Why Gut Health Affects Your Immune System",
-            date: "November 10, 2024",
+            blocks: [
+              {
+                type: "paragraph",
+                content: "Gut health is crucial for overall well-being...",
+              },
+              {
+                type: "list",
+                content: ["Eat well", "Stay active"],
+              },
+            ],
           },
         ]);
       } finally {
@@ -80,6 +71,22 @@ const Blog = () => {
     };
     fetchBlogPosts();
   }, []);
+
+  const getExcerpt = (post) => {
+    if (!post.blocks || post.blocks.length === 0) return "Read more...";
+    const firstBlock = post.blocks[0];
+    if (firstBlock.type === "paragraph") {
+      return firstBlock.content.split(" ").slice(0, 20).join(" ") + "...";
+    } else if (
+      firstBlock.type === "list" &&
+      Array.isArray(firstBlock.content)
+    ) {
+      return (
+        firstBlock.content[0] + (firstBlock.content.length > 1 ? "..." : "")
+      );
+    }
+    return "Read more...";
+  };
 
   if (loading) {
     return (
@@ -159,6 +166,7 @@ const Blog = () => {
               <Card
                 title={post.title}
                 footer={post.date}
+                content={getExcerpt(post)}
                 className="hover:shadow-lg transition-shadow duration-300 ease-in-out"
               />
             </Link>

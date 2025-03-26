@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, createContext } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
@@ -11,9 +10,10 @@ import Purchase from "./pages/shop/Purchase";
 import Blog from "./pages/content/Blog";
 import BlogPost from "./pages/content/BlogPost";
 import FAQ from "./pages/content/FAQ";
-import Quiz from "./pages/content/Quiz";
 import Contact from "./pages/content/Contact";
-import AdminPage from "./pages/AdminPage"; // New import
+import AdminPage from "./pages/AdminPage";
+import HomeAdminPage from "./pages/HomeAdminPage"; // New import
+import BlogAdminPage from "./pages/BlogAdminPage"; // New import
 import "./styles/global.css";
 
 export const ThemeContext = createContext();
@@ -41,10 +41,13 @@ function App() {
                 <Route path="blog" element={<Blog />} />
                 <Route path="blog/:id" element={<BlogPost />} />
                 <Route path="faq" element={<FAQ />} />
-                <Route path="quiz" element={<Quiz />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="admin" element={<AdminPage />} />{" "}
-                {/* Secret admin route */}
+                {/* Main admin page */}
+                <Route path="admin/home" element={<HomeAdminPage />} />{" "}
+                {/* Home admin sub-page */}
+                <Route path="admin/blog" element={<BlogAdminPage />} />{" "}
+                {/* Blog admin sub-page */}
               </Route>
             </Routes>
           </CSSTransition>

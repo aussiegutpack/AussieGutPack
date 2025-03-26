@@ -14,7 +14,6 @@ function Navigation() {
 
     { name: "Blog", href: "/blog" },
     { name: "FAQ", href: "/faq" },
-    { name: "Quiz", href: "/quiz" },
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
   ];
