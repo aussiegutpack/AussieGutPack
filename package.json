@@ -7,12 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "build:vercel": "vite build --mode vercel",
-    "build:github": "vite build --mode github",
+    "build:github": "VITE_BASE_PATH=/aussie-gut-pack/ REACT_APP_BASE_PATH=/aussie-gut-pack/ vite build --mode github",
     "lint": "eslint .",
     "preview": "vite preview",
     "tailwind": "tailwindcss",
     "predeploy": "npm run build",
-    "deploy": "vite build && cp dist/index.html dist/404.html && gh-pages -d dist"
+    "deploy": "npm run build:github && cp dist/index.html dist/404.html && gh-pages -d dist"
     
   },
   "dependencies": {

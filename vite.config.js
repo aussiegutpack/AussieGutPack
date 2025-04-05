@@ -13,11 +13,11 @@ const envFile =
     ? ".env.github"
     : mode === "vercel"
     ? ".env.vercel"
-    : ".env";
+    : ".env.local";
 dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
 console.log("VITE_BASE_PATH:", process.env.VITE_BASE_PATH);
-// https://vite.dev/config/
+
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || "/",
   plugins: [react(), tailwindcss()],

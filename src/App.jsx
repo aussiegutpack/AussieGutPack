@@ -34,7 +34,7 @@ function App() {
   }, [isDarkMode]);
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
-  const basename = process.env.REACT_APP_BASE_PATH || "/";
+  const basename = import.meta.env.VITE_BASE_PATH || "/";
   console.log("Basename:", basename);
 
   return (
