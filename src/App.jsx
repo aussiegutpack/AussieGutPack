@@ -34,11 +34,12 @@ function App() {
   }, [isDarkMode]);
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
+  const basename = process.env.REACT_APP_BASE_PATH || "/";
 
   return (
     <CartProvider>
       <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
-        <Router basename="/aussie-gut-pack">
+        <Router basename={basename}>
           <TransitionGroup>
             <CSSTransition
               key={window.location.pathname}
