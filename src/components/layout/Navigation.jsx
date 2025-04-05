@@ -11,9 +11,7 @@ function Navigation() {
 
   const navItems = [
     { name: "Home", href: "/" },
-
     { name: "Blog", href: "/blog" },
-    { name: "FAQ", href: "/faq" },
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
   ];
@@ -26,7 +24,8 @@ function Navigation() {
         isDarkMode ? "bg-stone-900 text-red-400" : "bg-white text-red-800"
       }`}
     >
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-4 flex items-center">
+        {/* Hamburger Menu (Mobile) */}
         <div className="md:hidden">
           <button
             onClick={toggleMenu}
@@ -50,10 +49,11 @@ function Navigation() {
             />
           </button>
         </div>
-        <div className="flex-grow text-center">
+        {/* Logo and Title (Centered on Mobile, Left on Desktop) */}
+        <div className="flex-grow text-center md:flex md:items-center md:text-left">
           <Link
             to="/"
-            className="flex justify-center items-center space-x-2"
+            className="flex justify-center md:justify-start items-center space-x-2"
             onClick={() => setIsMenuOpen(false)}
           >
             <Dog
@@ -64,6 +64,7 @@ function Navigation() {
             <span className="text-xl font-bold">Aussie Gut Pack</span>
           </Link>
         </div>
+        {/* Desktop Navigation Links and Theme Toggle */}
         <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link
@@ -93,6 +94,7 @@ function Navigation() {
             {isDarkMode ? "Light" : "Dark"}
           </button>
         </div>
+        {/* Theme Toggle (Mobile) */}
         <div className="md:hidden">
           <button
             onClick={toggleTheme}

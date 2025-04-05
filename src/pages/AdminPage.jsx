@@ -1,3 +1,4 @@
+// src/pages/admin/AdminPage.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
@@ -82,6 +83,12 @@ function AdminPage() {
           className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
         >
           Manage Blog Posts
+        </button>
+        <button
+          onClick={() => navigate("/admin/products")} // New button
+          className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+        >
+          Manage Products
         </button>
         <button
           onClick={() => navigate("/")}

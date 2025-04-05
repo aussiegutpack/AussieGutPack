@@ -1,4 +1,4 @@
-// src/pages/content/Blog.js
+// src/pages/content/Blog.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../App";
@@ -20,51 +20,29 @@ const Blog = () => {
         const blogData = blogSnapshot.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title,
-          date: doc.data().date,
           blocks: doc.data().blocks || [{ type: "paragraph", content: "" }],
+          lastEdited: doc.data().lastEdited || "", // Fetch lastEdited
         }));
         console.log("Fetched blog posts:", blogData);
         if (blogData.length > 0) {
-          setBlogPosts(blogData);
+          // Sort by lastEdited (newest first)
+          const sortedBlogData = blogData.sort((a, b) => {
+            const lastEditedA = a.lastEdited
+              ? new Date(a.lastEdited)
+              : new Date(0);
+            const lastEditedB = b.lastEdited
+              ? new Date(b.lastEdited)
+              : new Date(0);
+            return lastEditedB - lastEditedA;
+          });
+          setBlogPosts(sortedBlogData);
         } else {
-          setBlogPosts([
-            {
-              id: "1",
-              title: "The Importance of Gut Health",
-              date: "January 15, 2025",
-              blocks: [
-                {
-                  type: "paragraph",
-                  content: "Gut health is crucial for overall well-being...",
-                },
-                {
-                  type: "list",
-                  content: ["Eat well", "Stay active"],
-                },
-              ],
-            },
-          ]);
+          setBlogPosts([]);
         }
       } catch (err) {
         console.error("Error fetching blog posts:", err);
         setError("Failed to load blog posts: " + err.message);
-        setBlogPosts([
-          {
-            id: "1",
-            title: "The Importance of Gut Health",
-            date: "January 15, 2025",
-            blocks: [
-              {
-                type: "paragraph",
-                content: "Gut health is crucial for overall well-being...",
-              },
-              {
-                type: "list",
-                content: ["Eat well", "Stay active"],
-              },
-            ],
-          },
-        ]);
+        setBlogPosts([]); // No fallback posts, just show empty state
       } finally {
         setLoading(false);
       }
@@ -72,17 +50,35 @@ const Blog = () => {
     fetchBlogPosts();
   }, []);
 
+  // Format the lastEdited timestamp (without seconds)
+  const formatLastEdited = (timestamp) => {
+    if (!timestamp) return "Never edited";
+    const date = new Date(timestamp);
+    return date.toLocaleString([], {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    }); // e.g., "4/3/2025, 4:11 PM"
+  };
+
   const getExcerpt = (post) => {
     if (!post.blocks || post.blocks.length === 0) return "Read more...";
-    const firstBlock = post.blocks[0];
-    if (firstBlock.type === "paragraph") {
-      return firstBlock.content.split(" ").slice(0, 20).join(" ") + "...";
-    } else if (
-      firstBlock.type === "list" &&
-      Array.isArray(firstBlock.content)
-    ) {
+    const firstTextBlock = post.blocks.find(
+      (block) =>
+        block.type === "paragraph" ||
+        block.type === "list" ||
+        block.type === "bullet"
+    );
+    if (!firstTextBlock) return "Read more...";
+    if (firstTextBlock.type === "paragraph") {
+      return firstTextBlock.content.split(" ").slice(0, 15).join(" ") + "...";
+    } else if (Array.isArray(firstTextBlock.content)) {
       return (
-        firstBlock.content[0] + (firstBlock.content.length > 1 ? "..." : "")
+        firstTextBlock.content[0] +
+        (firstTextBlock.content.length > 1 ? "..." : "")
       );
     }
     return "Read more...";
@@ -91,23 +87,23 @@ const Blog = () => {
   if (loading) {
     return (
       <div
-        className={`min-h-screen container mx-auto p-6 ${
-          isDarkMode ? "bg-stone-900" : "bg-white"
+        className={`min-h-screen container mx-auto px-6 py-12 ${
+          isDarkMode ? "bg-stone-900" : "bg-stone-50"
         }`}
       >
         <h1
-          className={`text-3xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+          className={`text-4xl font-bold mb-8 transition-colors duration-300 ease-in-out ${
             isDarkMode ? "text-red-400" : "text-red-800"
           }`}
         >
           Our Blog
         </h1>
         <p
-          className={`transition-colors duration-300 ease-in-out ${
-            isDarkMode ? "text-white" : "text-red-600"
+          className={`text-lg transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-stone-300" : "text-stone-600"
           }`}
         >
-          Loading...
+          Loading posts...
         </p>
       </div>
     );
@@ -116,19 +112,19 @@ const Blog = () => {
   if (error) {
     return (
       <div
-        className={`min-h-screen container mx-auto p-6 ${
-          isDarkMode ? "bg-stone-900" : "bg-white"
+        className={`min-h-screen container mx-auto px-6 py-12 ${
+          isDarkMode ? "bg-stone-900" : "bg-stone-50"
         }`}
       >
         <h1
-          className={`text-3xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+          className={`text-4xl font-bold mb-8 transition-colors duration-300 ease-in-out ${
             isDarkMode ? "text-red-400" : "text-red-800"
           }`}
         >
           Our Blog
         </h1>
         <p
-          className={`text-red-500 transition-colors duration-300 ease-in-out ${
+          className={`text-lg transition-colors duration-300 ease-in-out ${
             isDarkMode ? "text-red-400" : "text-red-600"
           }`}
         >
@@ -140,12 +136,12 @@ const Blog = () => {
 
   return (
     <div
-      className={`min-h-screen container mx-auto p-6 ${
-        isDarkMode ? "bg-stone-900" : "bg-white"
+      className={`min-h-screen container mx-auto px-6 py-12 ${
+        isDarkMode ? "bg-stone-900" : "bg-stone-50"
       }`}
     >
       <h1
-        className={`text-3xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+        className={`text-4xl font-bold mb-8 transition-colors duration-300 ease-in-out ${
           isDarkMode ? "text-red-400" : "text-red-800"
         }`}
       >
@@ -153,21 +149,41 @@ const Blog = () => {
       </h1>
       {blogPosts.length === 0 ? (
         <p
-          className={`transition-colors duration-300 ease-in-out ${
-            isDarkMode ? "text-white" : "text-red-600"
+          className={`text-lg transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-stone-300" : "text-stone-600"
           }`}
         >
-          No blog posts available yet.
+          No blog posts available yet. Check back soon!
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogPosts.map((post) => (
-            <Link to={`/blog/${post.id}`} key={post.id}>
+            <Link to={`/blog/${post.id}`} key={post.id} className="block group">
               <Card
                 title={post.title}
-                footer={post.date}
-                content={getExcerpt(post)}
-                className="hover:shadow-lg transition-shadow duration-300 ease-in-out"
+                footer={
+                  <span
+                    className={`text-sm transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-400" : "text-stone-500"
+                    }`}
+                  >
+                    Last Edited: {formatLastEdited(post.lastEdited)}
+                  </span>
+                }
+                content={
+                  <p
+                    className={`text-base transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-300" : "text-stone-600"
+                    }`}
+                  >
+                    {getExcerpt(post)}
+                  </p>
+                }
+                className={`p-6 rounded-lg shadow-md transition-all duration-300 ease-in-out ${
+                  isDarkMode
+                    ? "bg-stone-800 hover:bg-stone-700"
+                    : "bg-white hover:bg-stone-100"
+                } group-hover:shadow-lg`}
               />
             </Link>
           ))}

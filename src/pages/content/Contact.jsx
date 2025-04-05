@@ -1,5 +1,7 @@
+// src/pages/content/Contact.jsx
 import React, { useState, useContext } from "react";
 import { ThemeContext } from "../../App";
+import emailjs from "@emailjs/browser";
 
 function Contact() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -17,10 +19,33 @@ function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    setStatus("Thank you! Your inquiry has been received.");
-    setFormData({ name: "", email: "", message: "" });
-    setTimeout(() => setStatus(""), 3000);
+    setStatus("Sending...");
+
+    // EmailJS send function
+    emailjs
+      .send(
+        "service_abc123", // Replace with your actual Service ID
+        "template_xyz789", // Replace with your actual Template ID
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+          to_email: "ThomasScales13@yahoo.com",
+        },
+        "user_123456" // Replace with your actual User ID
+      )
+      .then(
+        (result) => {
+          setStatus("Thank you! Your inquiry has been sent.");
+          setFormData({ name: "", email: "", message: "" });
+          setTimeout(() => setStatus(""), 3000);
+        },
+        (error) => {
+          setStatus("Failed to send message. Please try again.");
+          console.error("EmailJS error:", error.text); // Log the full error response
+          setTimeout(() => setStatus(""), 3000);
+        }
+      );
   };
 
   return (

@@ -14,6 +14,7 @@ import {
 function BlogAdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
   const [blogPosts, setBlogPosts] = useState([]);
+  const [selectedPostIndex, setSelectedPostIndex] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -25,18 +26,30 @@ function BlogAdminPage() {
         const blogData = blogSnapshot.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || "",
-          date: doc.data().date || "",
           blocks: doc.data().blocks || [{ type: "paragraph", content: "" }],
+          lastEdited: doc.data().lastEdited || "",
         }));
+
+        // Sort blog posts by lastEdited (newest first)
+        const sortedBlogData = blogData.sort((a, b) => {
+          const lastEditedA = a.lastEdited
+            ? new Date(a.lastEdited)
+            : new Date(0);
+          const lastEditedB = b.lastEdited
+            ? new Date(b.lastEdited)
+            : new Date(0);
+          return lastEditedB - lastEditedA; // Newest lastEdited first
+        });
+
         setBlogPosts(
-          blogData.length
-            ? blogData
+          sortedBlogData.length
+            ? sortedBlogData
             : [
                 {
                   id: "",
                   title: "",
-                  date: "",
                   blocks: [{ type: "paragraph", content: "" }],
+                  lastEdited: "",
                 },
               ]
         );
@@ -58,9 +71,10 @@ function BlogAdminPage() {
       for (const post of blogPosts) {
         if (
           post.title.trim() &&
-          post.date.trim() &&
           post.blocks.some((block) =>
-            block.type === "paragraph"
+            block.type === "paragraph" ||
+            block.type === "image" ||
+            block.type === "link"
               ? block.content.trim()
               : block.content.some((item) => item.trim())
           )
@@ -69,39 +83,54 @@ function BlogAdminPage() {
           await setDoc(doc(blogCollectionRef, postId), {
             id: postId,
             title: post.title,
-            date: post.date,
             blocks: post.blocks.map((block) => ({
               type: block.type,
               content:
-                block.type === "list"
-                  ? block.content.filter((item) => item.trim() !== "")
-                  : block.content,
+                block.type === "paragraph" || block.type === "image"
+                  ? block.content
+                  : block.type === "link"
+                  ? { url: block.content.url, text: block.content.text }
+                  : block.content.filter((item) => item.trim() !== ""),
             })),
+            lastEdited: post.lastEdited || new Date().toISOString(),
           });
         }
       }
       alert("Blog posts saved successfully!");
+      setSelectedPostIndex(null);
       navigate("/admin");
     } catch (err) {
       setError("Error saving blog posts: " + err.message);
     }
   };
 
-  const addBlogPost = () =>
-    setBlogPosts([
+  const addBlogPost = () => {
+    const newBlogPosts = [
       ...blogPosts,
       {
         id: "",
         title: "",
-        date: "",
         blocks: [{ type: "paragraph", content: "" }],
+        lastEdited: new Date().toISOString(),
       },
-    ]);
-  const removeBlogPost = (index) =>
-    setBlogPosts(blogPosts.filter((_, i) => i !== index));
+    ];
+    setBlogPosts(newBlogPosts);
+    setSelectedPostIndex(newBlogPosts.length - 1);
+  };
+
+  const removeBlogPost = (index) => {
+    const newBlogPosts = blogPosts.filter((_, i) => i !== index);
+    setBlogPosts(newBlogPosts);
+    setSelectedPostIndex(null);
+  };
+
   const updateBlogPost = (index, field, value) => {
     const newBlogPosts = [...blogPosts];
-    newBlogPosts[index] = { ...newBlogPosts[index], [field]: value };
+    newBlogPosts[index] = {
+      ...newBlogPosts[index],
+      [field]: value,
+      lastEdited: new Date().toISOString(),
+    };
     setBlogPosts(newBlogPosts);
   };
 
@@ -109,47 +138,90 @@ function BlogAdminPage() {
     const newBlogPosts = [...blogPosts];
     newBlogPosts[postIndex].blocks.push({
       type,
-      content: type === "paragraph" ? "" : [""],
+      content:
+        type === "paragraph" || type === "image"
+          ? ""
+          : type === "link"
+          ? { url: "", text: "" }
+          : [""],
     });
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
     setBlogPosts(newBlogPosts);
   };
+
   const removeBlock = (postIndex, blockIndex) => {
     const newBlogPosts = [...blogPosts];
     newBlogPosts[postIndex].blocks = newBlogPosts[postIndex].blocks.filter(
       (_, i) => i !== blockIndex
     );
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
     setBlogPosts(newBlogPosts);
   };
+
   const updateBlockType = (postIndex, blockIndex, type) => {
     const newBlogPosts = [...blogPosts];
-    const block = newBlogPosts[postIndex].blocks[blockIndex];
     newBlogPosts[postIndex].blocks[blockIndex] = {
       type,
-      content: type === "paragraph" ? "" : [""], // Reset content on type change
+      content:
+        type === "paragraph" || type === "image"
+          ? ""
+          : type === "link"
+          ? { url: "", text: "" }
+          : [""],
     };
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
     setBlogPosts(newBlogPosts);
   };
+
   const updateBlockContent = (postIndex, blockIndex, value) => {
     const newBlogPosts = [...blogPosts];
     newBlogPosts[postIndex].blocks[blockIndex].content = value;
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
     setBlogPosts(newBlogPosts);
   };
+
+  const updateLinkContent = (postIndex, blockIndex, field, value) => {
+    const newBlogPosts = [...blogPosts];
+    newBlogPosts[postIndex].blocks[blockIndex].content[field] = value;
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
+    setBlogPosts(newBlogPosts);
+  };
+
   const addListItem = (postIndex, blockIndex) => {
     const newBlogPosts = [...blogPosts];
     newBlogPosts[postIndex].blocks[blockIndex].content.push("");
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
     setBlogPosts(newBlogPosts);
   };
+
   const removeListItem = (postIndex, blockIndex, itemIndex) => {
     const newBlogPosts = [...blogPosts];
     newBlogPosts[postIndex].blocks[blockIndex].content = newBlogPosts[
       postIndex
     ].blocks[blockIndex].content.filter((_, i) => i !== itemIndex);
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
     setBlogPosts(newBlogPosts);
   };
+
   const updateListItem = (postIndex, blockIndex, itemIndex, value) => {
     const newBlogPosts = [...blogPosts];
     newBlogPosts[postIndex].blocks[blockIndex].content[itemIndex] = value;
+    newBlogPosts[postIndex].lastEdited = new Date().toISOString();
     setBlogPosts(newBlogPosts);
+  };
+
+  // Format the lastEdited timestamp for display (without seconds)
+  const formatLastEdited = (timestamp) => {
+    if (!timestamp) return "Never edited";
+    const date = new Date(timestamp);
+    return date.toLocaleString([], {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    }); // e.g., "4/3/2025, 10:15 AM"
   };
 
   return (
@@ -174,19 +246,73 @@ function BlogAdminPage() {
         </p>
       )}
 
-      <div className="mb-6">
-        {blogPosts.map((post, postIndex) => (
+      {selectedPostIndex === null ? (
+        // Blog List View
+        <div className="mb-6">
+          {blogPosts.length === 0 ? (
+            <p
+              className={`text-lg transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-stone-300" : "text-stone-600"
+              }`}
+            >
+              No blog posts available. Add a new post to get started.
+            </p>
+          ) : (
+            <div className="grid gap-4">
+              {blogPosts.map((post, index) => (
+                <div
+                  key={index}
+                  className={`p-4 border rounded cursor-pointer transition-all duration-300 ease-in-out hover:shadow-lg ${
+                    isDarkMode
+                      ? "border-stone-600 bg-stone-800"
+                      : "border-red-300 bg-white"
+                  }`}
+                  onClick={() => setSelectedPostIndex(index)}
+                >
+                  <h3
+                    className={`text-xl font-semibold transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-white" : "text-red-600"
+                    }`}
+                  >
+                    {post.title || "Untitled Post"}
+                  </h3>
+                  <p
+                    className={`text-sm italic transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-400" : "text-stone-500"
+                    }`}
+                  >
+                    Last Edited: {formatLastEdited(post.lastEdited)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={addBlogPost}
+            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-4"
+          >
+            Add Blog Post
+          </button>
+          <button
+            onClick={() => navigate("/admin")}
+            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-4 ml-4"
+          >
+            Back to Admin Dashboard
+          </button>
+        </div>
+      ) : (
+        // Blog Edit View
+        <div className="mb-6">
           <div
-            key={postIndex}
             className={`mb-4 border p-4 rounded ${
               isDarkMode ? "border-stone-600" : "border-red-300"
             }`}
           >
             <input
               type="text"
-              value={post.title}
+              value={blogPosts[selectedPostIndex].title}
               onChange={(e) =>
-                updateBlogPost(postIndex, "title", e.target.value)
+                updateBlogPost(selectedPostIndex, "title", e.target.value)
               }
               className={`border p-2 w-full mb-2 ${
                 isDarkMode
@@ -195,19 +321,14 @@ function BlogAdminPage() {
               }`}
               placeholder="Blog Title"
             />
-            <input
-              type="text"
-              value={post.date}
-              onChange={(e) =>
-                updateBlogPost(postIndex, "date", e.target.value)
-              }
-              className={`border p-2 w-full mb-2 ${
-                isDarkMode
-                  ? "bg-stone-700 border-stone-600 text-white"
-                  : "bg-white border-red-300 text-red-600"
+            <p
+              className={`text-sm italic mb-4 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-stone-400" : "text-stone-500"
               }`}
-              placeholder="Date (e.g., January 15, 2025)"
-            />
+            >
+              Last Edited:{" "}
+              {formatLastEdited(blogPosts[selectedPostIndex].lastEdited)}
+            </p>
             <div className="mb-2">
               <h4
                 className={`text-lg transition-colors duration-300 ease-in-out ${
@@ -216,7 +337,7 @@ function BlogAdminPage() {
               >
                 Content Blocks
               </h4>
-              {post.blocks.map((block, blockIndex) => (
+              {blogPosts[selectedPostIndex].blocks.map((block, blockIndex) => (
                 <div
                   key={blockIndex}
                   className="mb-4 border-t pt-2 mt-2 border-stone-400"
@@ -232,7 +353,11 @@ function BlogAdminPage() {
                     <select
                       value={block.type}
                       onChange={(e) =>
-                        updateBlockType(postIndex, blockIndex, e.target.value)
+                        updateBlockType(
+                          selectedPostIndex,
+                          blockIndex,
+                          e.target.value
+                        )
                       }
                       className={`border p-2 ${
                         isDarkMode
@@ -242,11 +367,16 @@ function BlogAdminPage() {
                     >
                       <option value="paragraph">Paragraph</option>
                       <option value="list">Numbered List</option>
+                      <option value="bullet">Bullet Points</option>
+                      <option value="image">Image</option>
+                      <option value="link">Link</option>
                     </select>
                     <button
-                      onClick={() => removeBlock(postIndex, blockIndex)}
+                      onClick={() => removeBlock(selectedPostIndex, blockIndex)}
                       className="ml-2 bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-                      disabled={post.blocks.length === 1}
+                      disabled={
+                        blogPosts[selectedPostIndex].blocks.length === 1
+                      }
                     >
                       Remove Block
                     </button>
@@ -256,7 +386,7 @@ function BlogAdminPage() {
                       value={block.content}
                       onChange={(e) =>
                         updateBlockContent(
-                          postIndex,
+                          selectedPostIndex,
                           blockIndex,
                           e.target.value
                         )
@@ -268,6 +398,72 @@ function BlogAdminPage() {
                       }`}
                       placeholder="Paragraph Content"
                     />
+                  ) : block.type === "image" ? (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={block.content}
+                        onChange={(e) =>
+                          updateBlockContent(
+                            selectedPostIndex,
+                            blockIndex,
+                            e.target.value
+                          )
+                        }
+                        className={`border p-2 w-full ${
+                          isDarkMode
+                            ? "bg-stone-700 border-stone-600 text-white"
+                            : "bg-white border-red-300 text-red-600"
+                        }`}
+                        placeholder="Image URL (e.g., https://example.com/image.jpg)"
+                      />
+                      {block.content && (
+                        <img
+                          src={block.content}
+                          alt="Preview"
+                          className="w-full max-w-xs rounded-lg shadow-md"
+                        />
+                      )}
+                    </div>
+                  ) : block.type === "link" ? (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={block.content.url}
+                        onChange={(e) =>
+                          updateLinkContent(
+                            selectedPostIndex,
+                            blockIndex,
+                            "url",
+                            e.target.value
+                          )
+                        }
+                        className={`border p-2 w-full ${
+                          isDarkMode
+                            ? "bg-stone-700 border-stone-600 text-white"
+                            : "bg-white border-red-300 text-red-600"
+                        }`}
+                        placeholder="Link URL (e.g., https://example.com)"
+                      />
+                      <input
+                        type="text"
+                        value={block.content.text}
+                        onChange={(e) =>
+                          updateLinkContent(
+                            selectedPostIndex,
+                            blockIndex,
+                            "text",
+                            e.target.value
+                          )
+                        }
+                        className={`border p-2 w-full ${
+                          isDarkMode
+                            ? "bg-stone-700 border-stone-600 text-white"
+                            : "bg-white border-red-300 text-red-600"
+                        }`}
+                        placeholder="Link Text (e.g., Click here)"
+                      />
+                    </div>
                   ) : (
                     <div>
                       {block.content.map((item, itemIndex) => (
@@ -277,7 +473,7 @@ function BlogAdminPage() {
                             value={item}
                             onChange={(e) =>
                               updateListItem(
-                                postIndex,
+                                selectedPostIndex,
                                 blockIndex,
                                 itemIndex,
                                 e.target.value
@@ -292,17 +488,26 @@ function BlogAdminPage() {
                           />
                           <button
                             onClick={() =>
-                              removeListItem(postIndex, blockIndex, itemIndex)
+                              removeListItem(
+                                selectedPostIndex,
+                                blockIndex,
+                                itemIndex
+                              )
                             }
                             className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-                            disabled={block.content.length === 1}
+                            disabled={
+                              blogPosts[selectedPostIndex].blocks[blockIndex]
+                                .content.length === 1
+                            }
                           >
                             Remove
                           </button>
                         </div>
                       ))}
                       <button
-                        onClick={() => addListItem(postIndex, blockIndex)}
+                        onClick={() =>
+                          addListItem(selectedPostIndex, blockIndex)
+                        }
                         className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
                       >
                         Add List Item
@@ -311,50 +516,67 @@ function BlogAdminPage() {
                   )}
                 </div>
               ))}
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-2 flex-wrap">
                 <button
-                  onClick={() => addBlock(postIndex, "paragraph")}
+                  onClick={() => addBlock(selectedPostIndex, "paragraph")}
                   className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
                 >
                   Add Paragraph
                 </button>
                 <button
-                  onClick={() => addBlock(postIndex, "list")}
+                  onClick={() => addBlock(selectedPostIndex, "list")}
                   className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
                 >
-                  Add List
+                  Add Numbered List
+                </button>
+                <button
+                  onClick={() => addBlock(selectedPostIndex, "bullet")}
+                  className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                >
+                  Add Bullet Points
+                </button>
+                <button
+                  onClick={() => addBlock(selectedPostIndex, "image")}
+                  className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                >
+                  Add Image
+                </button>
+                <button
+                  onClick={() => addBlock(selectedPostIndex, "link")}
+                  className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                >
+                  Add Link
                 </button>
               </div>
             </div>
             <button
-              onClick={() => removeBlogPost(postIndex)}
-              className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
+              onClick={() => removeBlogPost(selectedPostIndex)}
+              className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2 mr-4"
               disabled={blogPosts.length === 1}
             >
               Remove Post
             </button>
+            <button
+              onClick={() => setSelectedPostIndex(null)}
+              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
+            >
+              Back to List
+            </button>
           </div>
-        ))}
-        <button
-          onClick={addBlogPost}
-          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
-        >
-          Add Blog Post
-        </button>
-      </div>
-
-      <button
-        onClick={handleSave}
-        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
-      >
-        Save Changes
-      </button>
-      <button
-        onClick={() => navigate("/admin")}
-        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-      >
-        Back to Admin Dashboard
-      </button>
+          <button
+            onClick={handleSave}
+            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
+          >
+            Save Changes
+          </button>
+          <button
+            onClick={() => navigate("/admin")}
+            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+          >
+            Back to Admin Dashboard
+          </button>
+        </div>
+      )}
     </div>
   );
 }

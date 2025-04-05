@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../App";
@@ -113,24 +114,79 @@ function Home() {
 
       setContent(newContent);
 
-      const blogCollectionRef = collection(db, "content", "blog", "posts");
-      const blogSnapshot = await getDocs(blogCollectionRef);
-      const blogPosts = blogSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      // Fetch blog posts
+      try {
+        const blogCollectionRef = collection(db, "content", "blog", "posts");
+        const blogSnapshot = await getDocs(blogCollectionRef);
+        const blogPosts = blogSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-      if (blogPosts.length > 0) {
-        blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const latestPost = blogPosts[0];
-        const excerpt =
-          latestPost.content.split(" ").slice(0, 30).join(" ") + "...";
-        setLatestBlogPost({ ...latestPost, excerpt });
+        if (blogPosts.length > 0) {
+          blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+          const latestPost = blogPosts[0];
+          const excerpt = getExcerpt(latestPost);
+          setLatestBlogPost({ ...latestPost, excerpt });
+        } else {
+          // Fallback if no posts exist
+          setLatestBlogPost({
+            id: "1",
+            title: "The Importance of Gut Health",
+            date: "January 15, 2025",
+            blocks: [
+              {
+                type: "paragraph",
+                content: "Gut health is crucial for overall well-being...",
+              },
+            ],
+            excerpt: "Gut health is crucial for overall well-being...",
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching blog posts:", err);
+        setLatestBlogPost({
+          id: "1",
+          title: "The Importance of Gut Health",
+          date: "January 15, 2025",
+          blocks: [
+            {
+              type: "paragraph",
+              content: "Gut health is crucial for overall well-being...",
+            },
+          ],
+          excerpt: "Gut health is crucial for overall well-being...",
+        });
       }
     };
 
     fetchAndUpdateContent();
   }, []);
+
+  // Excerpt function to handle blocks
+  const getExcerpt = (post) => {
+    if (!post || !post.blocks || post.blocks.length === 0)
+      return "Read more...";
+    const firstTextBlock = post.blocks.find(
+      (block) =>
+        block.type === "paragraph" ||
+        block.type === "list" ||
+        block.type === "bullet"
+    );
+    if (!firstTextBlock) return "Read more...";
+    if (firstTextBlock.type === "paragraph" && firstTextBlock.content) {
+      return firstTextBlock.content.split(" ").slice(0, 30).join(" ") + "...";
+    } else if (
+      Array.isArray(firstTextBlock.content) &&
+      firstTextBlock.content.length > 0
+    ) {
+      return (
+        firstTextBlock.content[0] +
+        (firstTextBlock.content.length > 1 ? "..." : "")
+      );
+    }
+    return "Read more...";
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
