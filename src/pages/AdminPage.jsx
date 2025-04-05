@@ -1,19 +1,52 @@
 // src/pages/admin/AdminPage.jsx
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
+import { auth } from "../firebase"; // Import auth from your firebase config
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth"; // Import Firebase Auth methods
 
 function AdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
+  const [email, setEmail] = useState(""); // Add email state
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState(null); // Add error state for login failures
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (password === "agp9489") {
-      setIsAuthenticated(true);
-    } else {
-      alert("Incorrect password");
+  // Check authentication state on mount
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true); // User is authenticated
+      } else {
+        setIsAuthenticated(false); // User is not authenticated
+      }
+    });
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Prevent form submission from refreshing the page
+    setError(null); // Clear any previous errors
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setIsAuthenticated(true); // This will be handled by onAuthStateChanged, but we set it here for immediate feedback
+    } catch (err) {
+      setError("Failed to log in: " + err.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setIsAuthenticated(false); // This will be handled by onAuthStateChanged, but we set it here for immediate feedback
+      navigate("/admin"); // Redirect back to the login screen
+    } catch (err) {
+      setError("Failed to log out: " + err.message);
     }
   };
 
@@ -36,23 +69,51 @@ function AdminPage() {
           >
             Admin Login
           </h2>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={`border p-2 w-full mb-4 ${
-              isDarkMode
-                ? "bg-stone-700 border-stone-600 text-white"
-                : "bg-white border-red-300 text-red-600"
-            }`}
-            placeholder="Enter password"
-          />
-          <button
-            onClick={handleLogin}
-            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-          >
-            Login
-          </button>
+          {error && (
+            <p
+              className={`text-red-500 mb-4 ${
+                isDarkMode ? "text-red-400" : "text-red-600"
+              }`}
+            >
+              {error}
+            </p>
+          )}
+          <form onSubmit={handleLogin}>
+            <div className="mb-4">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`border p-2 w-full mb-4 ${
+                  isDarkMode
+                    ? "bg-stone-700 border-stone-600 text-white"
+                    : "bg-white border-red-300 text-red-600"
+                }`}
+                placeholder="Enter email"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`border p-2 w-full mb-4 ${
+                  isDarkMode
+                    ? "bg-stone-700 border-stone-600 text-white"
+                    : "bg-white border-red-300 text-red-600"
+                }`}
+                placeholder="Enter password"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+            >
+              Login
+            </button>
+          </form>
         </div>
       </div>
     );
@@ -85,7 +146,7 @@ function AdminPage() {
           Manage Blog Posts
         </button>
         <button
-          onClick={() => navigate("/admin/products")} // New button
+          onClick={() => navigate("/admin/products")}
           className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
         >
           Manage Products
@@ -95,6 +156,12 @@ function AdminPage() {
           className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
         >
           Back to Home
+        </button>
+        <button
+          onClick={handleLogout}
+          className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+        >
+          Log Out
         </button>
       </div>
     </div>

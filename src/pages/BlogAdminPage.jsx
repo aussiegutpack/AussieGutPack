@@ -2,7 +2,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
-import { db } from "../firebase";
+import { db, auth } from "../firebase"; // Import auth
 import {
   collection,
   getDocs,
@@ -10,6 +10,7 @@ import {
   doc,
   deleteDoc,
 } from "firebase/firestore";
+import { onAuthStateChanged, signOut } from "firebase/auth"; // Import Firebase Auth methods
 
 function BlogAdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -17,6 +18,16 @@ function BlogAdminPage() {
   const [selectedPostIndex, setSelectedPostIndex] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  // Check authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/admin"); // Redirect to /admin if not authenticated
+      }
+    });
+    return () => unsubscribe(); // Cleanup on unmount
+  }, [navigate]);
 
   useEffect(() => {
     const fetchBlogPosts = async () => {
@@ -101,6 +112,15 @@ function BlogAdminPage() {
       navigate("/admin");
     } catch (err) {
       setError("Error saving blog posts: " + err.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/admin"); // Redirect to /admin after logout
+    } catch (err) {
+      setError("Failed to log out: " + err.message);
     }
   };
 
@@ -298,6 +318,12 @@ function BlogAdminPage() {
             className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-4 ml-4"
           >
             Back to Admin Dashboard
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-4 ml-4"
+          >
+            Log Out
           </button>
         </div>
       ) : (
@@ -571,9 +597,15 @@ function BlogAdminPage() {
           </button>
           <button
             onClick={() => navigate("/admin")}
-            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
           >
             Back to Admin Dashboard
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+          >
+            Log Out
           </button>
         </div>
       )}

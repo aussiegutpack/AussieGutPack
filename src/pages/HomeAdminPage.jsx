@@ -1,7 +1,9 @@
+// src/pages/HomeAdminPage.js
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
-import { db } from "../firebase";
+import { db, auth } from "../firebase"; // Import auth
+import { onAuthStateChanged, signOut } from "firebase/auth"; // Import Firebase Auth methods
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 function HomeAdminPage() {
@@ -15,6 +17,16 @@ function HomeAdminPage() {
   const [dailyChallenges, setDailyChallenges] = useState([""]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  // Check authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/admin"); // Redirect to /admin if not authenticated
+      }
+    });
+    return () => unsubscribe(); // Cleanup on unmount
+  }, [navigate]);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -96,6 +108,15 @@ function HomeAdminPage() {
       navigate("/admin");
     } catch (err) {
       setError("Error saving changes: " + err.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/admin"); // Redirect to /admin after logout
+    } catch (err) {
+      setError("Failed to log out: " + err.message);
     }
   };
 
@@ -551,9 +572,15 @@ function HomeAdminPage() {
       </button>
       <button
         onClick={() => navigate("/admin")}
-        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
       >
         Back to Admin Dashboard
+      </button>
+      <button
+        onClick={handleLogout}
+        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+      >
+        Log Out
       </button>
     </div>
   );

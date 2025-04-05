@@ -1,7 +1,8 @@
-// src/pages/admin/AdminProducts.jsx
+// src/pages/admin/ProductsAdminPage.jsx
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { ThemeContext } from "../App";
-import { db, storage } from "../firebase";
+import { db, storage, auth } from "../firebase"; // Import auth
 import {
   collection,
   getDocs,
@@ -16,8 +17,9 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
+import { onAuthStateChanged, signOut } from "firebase/auth"; // Import Firebase Auth methods
 
-function AdminProducts() {
+function ProductsAdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -33,6 +35,18 @@ function AdminProducts() {
   });
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [error, setError] = useState(null); // Add error state for logout errors
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  // Check authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/admin"); // Redirect to /admin if not authenticated
+      }
+    });
+    return () => unsubscribe(); // Cleanup on unmount
+  }, [navigate]);
 
   // Fetch categories and products from Firestore
   useEffect(() => {
@@ -52,7 +66,7 @@ function AdminProducts() {
         }));
         setProducts(productsList);
       } catch (error) {
-        console.error("Error fetching data from Firestore:", error);
+        setError("Error fetching data from Firestore: " + error.message);
       }
     };
 
@@ -73,7 +87,7 @@ function AdminProducts() {
       ]);
       setNewCategoryName("");
     } catch (error) {
-      console.error("Error adding category:", error);
+      setError("Error adding category: " + error.message);
     }
   };
 
@@ -89,7 +103,7 @@ function AdminProducts() {
       );
       setEditingCategory(null);
     } catch (error) {
-      console.error("Error updating category:", error);
+      setError("Error updating category: " + error.message);
     }
   };
 
@@ -110,9 +124,8 @@ function AdminProducts() {
             `products/${decodeURIComponent(filePath)}`
           );
           await deleteObject(storageRef).catch((error) => {
-            console.error(
-              `Error deleting image for product ${prod.id}:`,
-              error
+            setError(
+              `Error deleting image for product ${prod.id}: ` + error.message
             );
           });
         }
@@ -121,7 +134,7 @@ function AdminProducts() {
       }
       setProducts(products.filter((prod) => prod.categoryId !== categoryId));
     } catch (error) {
-      console.error("Error deleting category:", error);
+      setError("Error deleting category: " + error.message);
     }
   };
 
@@ -173,7 +186,7 @@ function AdminProducts() {
         size: "",
       });
     } catch (error) {
-      console.error("Error adding product:", error);
+      setError("Error adding product: " + error.message);
       alert(
         "Failed to add product. Check Firebase Storage rules and ensure Storage is enabled."
       );
@@ -216,7 +229,7 @@ function AdminProducts() {
       );
       setEditingProduct(null);
     } catch (error) {
-      console.error("Error updating product:", error);
+      setError("Error updating product: " + error.message);
       alert(
         "Failed to update product. Check Firebase Storage rules and ensure Storage is enabled."
       );
@@ -236,9 +249,8 @@ function AdminProducts() {
           `products/${decodeURIComponent(filePath)}`
         );
         await deleteObject(storageRef).catch((error) => {
-          console.error(
-            `Error deleting image for product ${productId}:`,
-            error
+          setError(
+            `Error deleting image for product ${productId}: ` + error.message
           );
         });
       }
@@ -247,7 +259,17 @@ function AdminProducts() {
       await deleteDoc(doc(db, "products", productId));
       setProducts(products.filter((prod) => prod.id !== productId));
     } catch (error) {
-      console.error("Error deleting product:", error);
+      setError("Error deleting product: " + error.message);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/admin"); // Redirect to /admin after logout
+    } catch (error) {
+      setError("Failed to log out: " + error.message);
     }
   };
 
@@ -264,6 +286,16 @@ function AdminProducts() {
       >
         Admin - Manage Products
       </h1>
+
+      {error && (
+        <p
+          className={`text-red-500 mb-4 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-600"
+          }`}
+        >
+          {error}
+        </p>
+      )}
 
       {/* Add Category Form */}
       <div className="mb-12">
@@ -834,8 +866,24 @@ function AdminProducts() {
           ))}
         </div>
       </div>
+
+      {/* Navigation Buttons */}
+      <div className="mt-6 flex gap-4">
+        <button
+          onClick={() => navigate("/admin")}
+          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+        >
+          Back to Admin Dashboard
+        </button>
+        <button
+          onClick={handleLogout}
+          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+        >
+          Log Out
+        </button>
+      </div>
     </div>
   );
 }
 
-export default AdminProducts;
+export default ProductsAdminPage;

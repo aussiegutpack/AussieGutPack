@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
 console.log("initializeApp:", typeof initializeApp); // Should log "function"
 console.log("getFirestore:", typeof getFirestore); // Should log "function" or "undefined"
@@ -21,3 +22,4 @@ console.log("Firebase app:", app); // Should log an object
 export const db = getFirestore(app);
 console.log("Firestore db:", db); // Should log an object or throw error
 export const storage = getStorage(app);
+export const auth = getAuth(app); // Export auth
