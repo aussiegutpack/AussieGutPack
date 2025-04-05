@@ -35,6 +35,7 @@ function App() {
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
   const basename = process.env.REACT_APP_BASE_PATH || "/";
+  console.log("Basename:", basename);
 
   return (
     <CartProvider>
