@@ -13,11 +13,13 @@
     "tailwind": "tailwindcss",
     "predeploy": "npm run build",
     "deploy": "vite build && cp dist/index.html dist/404.html && gh-pages -d dist"
+    
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@shadcn/ui": "^0.0.4",
     "@tailwindcss/vite": "^4.0.3",
+    "dotenv": "^16.4.7",
     "firebase": "^11.5.0",
     "font-awesome": "^4.7.0",
     "framer-motion": "^12.5.0",
