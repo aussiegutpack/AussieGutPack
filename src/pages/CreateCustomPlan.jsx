@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
 import { ThemeContext } from "../App";
-import { ChevronDown, ChevronUp } from "lucide-react"; // For collapsible icons
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const CreateCustomPlan = () => {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ const CreateCustomPlan = () => {
       ],
     }))
   );
-  const [expandedWeeks, setExpandedWeeks] = useState(Array(6).fill(false)); // Track which weeks are expanded
+  const [expandedWeeks, setExpandedWeeks] = useState(Array(6).fill(false));
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -127,14 +127,14 @@ const CreateCustomPlan = () => {
         >
           Create Custom Plan
         </h1>
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+        <form onSubmit={handleSubmit}>
           <div
             className={`mb-8 p-6 rounded-lg shadow-md ${
               isDarkMode ? "bg-stone-800" : "bg-red-50"
             }`}
           >
             <label
-              className={`block text-lg font-semibold mb-2 ${
+              className={`block text-xl font-semibold mb-2 ${
                 isDarkMode ? "text-red-400" : "text-red-800"
               }`}
             >
@@ -152,251 +152,257 @@ const CreateCustomPlan = () => {
               required
             />
           </div>
-          {weeks.map((week, weekIndex) => (
-            <div
-              key={weekIndex}
-              className={`mb-6 p-6 rounded-lg shadow-md ${
-                isDarkMode ? "bg-stone-800" : "bg-red-50"
-              }`}
-            >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {weeks.map((week, weekIndex) => (
               <div
-                className="flex justify-between items-center cursor-pointer"
-                onClick={() => toggleWeek(weekIndex)}
+                key={weekIndex}
+                className={`p-6 rounded-lg shadow-md ${
+                  isDarkMode ? "bg-stone-800" : "bg-red-50"
+                }`}
               >
-                <h2
-                  className={`text-2xl font-semibold ${
-                    isDarkMode ? "text-red-400" : "text-red-800"
+                <div
+                  className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 ${
+                    isDarkMode ? "hover:bg-stone-700" : "hover:bg-red-100"
                   }`}
+                  onClick={() => toggleWeek(weekIndex)}
                 >
-                  Week {week.week}
-                </h2>
-                {expandedWeeks[weekIndex] ? (
-                  <ChevronUp
-                    className={`w-6 h-6 ${
+                  <h2
+                    className={`text-2xl font-semibold ${
                       isDarkMode ? "text-red-400" : "text-red-800"
                     }`}
-                  />
-                ) : (
-                  <ChevronDown
-                    className={`w-6 h-6 ${
-                      isDarkMode ? "text-red-400" : "text-red-800"
-                    }`}
-                  />
-                )}
-              </div>
-              {expandedWeeks[weekIndex] && (
-                <div className="mt-4">
-                  {week.days.map((day, dayIndex) => (
-                    <div
-                      key={dayIndex}
-                      className={`border p-4 rounded-md mb-4 ${
-                        isDarkMode ? "border-stone-600" : "border-red-200"
+                  >
+                    Week {week.week}
+                  </h2>
+                  {expandedWeeks[weekIndex] ? (
+                    <ChevronUp
+                      className={`w-6 h-6 ${
+                        isDarkMode ? "text-red-400" : "text-red-800"
                       }`}
-                    >
-                      <h3
-                        className={`text-xl font-semibold mb-2 ${
-                          isDarkMode ? "text-red-400" : "text-red-800"
+                    />
+                  ) : (
+                    <ChevronDown
+                      className={`w-6 h-6 ${
+                        isDarkMode ? "text-red-400" : "text-red-800"
+                      }`}
+                    />
+                  )}
+                </div>
+                {expandedWeeks[weekIndex] && (
+                  <div className="mt-4">
+                    {week.days.map((day, dayIndex) => (
+                      <div
+                        key={dayIndex}
+                        className={`border p-4 rounded-md mb-4 ${
+                          isDarkMode ? "border-stone-600" : "border-red-200"
                         }`}
                       >
-                        {day.day}
-                      </h3>
-                      <div className="mt-2">
-                        <h4
-                          className={`font-semibold mb-2 ${
+                        <h3
+                          className={`text-xl font-semibold mb-2 ${
                             isDarkMode ? "text-red-400" : "text-red-800"
                           }`}
                         >
-                          Workouts:
-                        </h4>
-                        {day.workouts.length > 0 ? (
-                          day.workouts.map((workout, workoutIndex) => (
-                            <div
-                              key={workoutIndex}
-                              className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-3"
-                            >
-                              <select
-                                value={workout.name}
-                                onChange={(e) =>
-                                  handleWorkoutChange(
-                                    weekIndex,
-                                    dayIndex,
-                                    workoutIndex,
-                                    "name",
-                                    e.target.value
-                                  )
-                                }
-                                className={`w-full sm:w-1/3 p-2 border rounded-md focus:outline-none focus:ring-2 mb-2 sm:mb-0 ${
-                                  isDarkMode
-                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                                }`}
-                              >
-                                {workouts.map((w) => (
-                                  <option key={w.id} value={w.name}>
-                                    {w.name}
-                                  </option>
-                                ))}
-                              </select>
-                              <input
-                                type="number"
-                                value={workout.sets}
-                                onChange={(e) =>
-                                  handleWorkoutChange(
-                                    weekIndex,
-                                    dayIndex,
-                                    workoutIndex,
-                                    "sets",
-                                    Number(e.target.value)
-                                  )
-                                }
-                                className={`w-full sm:w-24 p-2 border rounded-md focus:outline-none focus:ring-2 mb-2 sm:mb-0 ${
-                                  isDarkMode
-                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                                }`}
-                                placeholder="Sets"
-                              />
-                              <input
-                                type="text"
-                                value={workout.reps}
-                                onChange={(e) =>
-                                  handleWorkoutChange(
-                                    weekIndex,
-                                    dayIndex,
-                                    workoutIndex,
-                                    "reps",
-                                    e.target.value
-                                  )
-                                }
-                                className={`w-full sm:w-24 p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                  isDarkMode
-                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                                }`}
-                                placeholder="Reps"
-                              />
-                            </div>
-                          ))
-                        ) : (
-                          <p
-                            className={`text-sm italic ${
+                          {day.day}
+                        </h3>
+                        <div className="mb-4">
+                          <h4
+                            className={`text-base font-semibold mb-2 ${
                               isDarkMode ? "text-red-400" : "text-red-800"
                             }`}
                           >
-                            No workouts added yet.
-                          </p>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleAddWorkout(weekIndex, dayIndex)}
-                          className={`mt-2 px-4 py-1 rounded-md transition-colors duration-200 ${
-                            isDarkMode
-                              ? "bg-red-800 text-white hover:bg-red-900"
-                              : "bg-red-800 text-white hover:bg-red-900"
-                          }`}
-                        >
-                          Add Workout
-                        </button>
-                      </div>
-                      <div className="mt-4">
-                        <h4
-                          className={`font-semibold mb-2 ${
-                            isDarkMode ? "text-red-400" : "text-red-800"
-                          }`}
-                        >
-                          Macro Goals:
-                        </h4>
-                        <div className="flex flex-col sm:flex-row sm:space-x-4">
-                          <div className="mb-3 sm:mb-0">
-                            <label
-                              className={`block text-sm ${
+                            Workouts:
+                          </h4>
+                          {day.workouts.length > 0 ? (
+                            day.workouts.map((workout, workoutIndex) => (
+                              <div
+                                key={workoutIndex}
+                                className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-3"
+                              >
+                                <select
+                                  value={workout.name}
+                                  onChange={(e) =>
+                                    handleWorkoutChange(
+                                      weekIndex,
+                                      dayIndex,
+                                      workoutIndex,
+                                      "name",
+                                      e.target.value
+                                    )
+                                  }
+                                  className={`w-full sm:w-1/3 p-2 border rounded-md focus:outline-none focus:ring-2 mb-2 sm:mb-0 ${
+                                    isDarkMode
+                                      ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                                      : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                                  }`}
+                                >
+                                  {workouts.map((w) => (
+                                    <option key={w.id} value={w.name}>
+                                      {w.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <input
+                                  type="number"
+                                  value={workout.sets}
+                                  onChange={(e) =>
+                                    handleWorkoutChange(
+                                      weekIndex,
+                                      dayIndex,
+                                      workoutIndex,
+                                      "sets",
+                                      Number(e.target.value)
+                                    )
+                                  }
+                                  className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 mb-2 sm:mb-0 ${
+                                    isDarkMode
+                                      ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                                      : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                                  }`}
+                                  placeholder="Sets"
+                                />
+                                <input
+                                  type="text"
+                                  value={workout.reps}
+                                  onChange={(e) =>
+                                    handleWorkoutChange(
+                                      weekIndex,
+                                      dayIndex,
+                                      workoutIndex,
+                                      "reps",
+                                      e.target.value
+                                    )
+                                  }
+                                  className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                    isDarkMode
+                                      ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                                      : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                                  }`}
+                                  placeholder="Reps"
+                                />
+                              </div>
+                            ))
+                          ) : (
+                            <p
+                              className={`text-sm italic ${
                                 isDarkMode ? "text-red-400" : "text-red-800"
                               }`}
                             >
-                              Protein (g)
-                            </label>
-                            <input
-                              type="number"
-                              value={day.macros.protein}
-                              onChange={(e) =>
-                                handleMacroChange(
-                                  weekIndex,
-                                  dayIndex,
-                                  "protein",
-                                  e.target.value
-                                )
-                              }
-                              className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                isDarkMode
-                                  ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                  : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                              }`}
-                            />
-                          </div>
-                          <div className="mb-3 sm:mb-0">
-                            <label
-                              className={`block text-sm ${
-                                isDarkMode ? "text-red-400" : "text-red-800"
-                              }`}
-                            >
-                              Carbs (g)
-                            </label>
-                            <input
-                              type="number"
-                              value={day.macros.carbs}
-                              onChange={(e) =>
-                                handleMacroChange(
-                                  weekIndex,
-                                  dayIndex,
-                                  "carbs",
-                                  e.target.value
-                                )
-                              }
-                              className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                isDarkMode
-                                  ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                  : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                              }`}
-                            />
-                          </div>
-                          <div>
-                            <label
-                              className={`block text-sm ${
-                                isDarkMode ? "text-red-400" : "text-red-800"
-                              }`}
-                            >
-                              Fats (g)
-                            </label>
-                            <input
-                              type="number"
-                              value={day.macros.fats}
-                              onChange={(e) =>
-                                handleMacroChange(
-                                  weekIndex,
-                                  dayIndex,
-                                  "fats",
-                                  e.target.value
-                                )
-                              }
-                              className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                isDarkMode
-                                  ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                  : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                              }`}
-                            />
+                              No workouts added yet.
+                            </p>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleAddWorkout(weekIndex, dayIndex)
+                            }
+                            className={`mt-2 w-full p-2 rounded-md transition-colors duration-200 ${
+                              isDarkMode
+                                ? "bg-red-800 text-white hover:bg-red-900"
+                                : "bg-red-800 text-white hover:bg-red-900"
+                            }`}
+                          >
+                            Add Workout
+                          </button>
+                        </div>
+                        <div>
+                          <h4
+                            className={`text-base font-semibold mb-2 ${
+                              isDarkMode ? "text-red-400" : "text-red-800"
+                            }`}
+                          >
+                            Macro Goals:
+                          </h4>
+                          <div className="flex flex-col sm:flex-row sm:space-x-4">
+                            <div className="mb-3 sm:mb-0">
+                              <label
+                                className={`block text-sm font-medium mb-1 ${
+                                  isDarkMode ? "text-red-400" : "text-red-800"
+                                }`}
+                              >
+                                Protein (g)
+                              </label>
+                              <input
+                                type="number"
+                                value={day.macros.protein}
+                                onChange={(e) =>
+                                  handleMacroChange(
+                                    weekIndex,
+                                    dayIndex,
+                                    "protein",
+                                    e.target.value
+                                  )
+                                }
+                                className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                  isDarkMode
+                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                                }`}
+                              />
+                            </div>
+                            <div className="mb-3 sm:mb-0">
+                              <label
+                                className={`block text-sm font-medium mb-1 ${
+                                  isDarkMode ? "text-red-400" : "text-red-800"
+                                }`}
+                              >
+                                Carbs (g)
+                              </label>
+                              <input
+                                type="number"
+                                value={day.macros.carbs}
+                                onChange={(e) =>
+                                  handleMacroChange(
+                                    weekIndex,
+                                    dayIndex,
+                                    "carbs",
+                                    e.target.value
+                                  )
+                                }
+                                className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                  isDarkMode
+                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                                }`}
+                              />
+                            </div>
+                            <div>
+                              <label
+                                className={`block text-sm font-medium mb-1 ${
+                                  isDarkMode ? "text-red-400" : "text-red-800"
+                                }`}
+                              >
+                                Fats (g)
+                              </label>
+                              <input
+                                type="number"
+                                value={day.macros.fats}
+                                onChange={(e) =>
+                                  handleMacroChange(
+                                    weekIndex,
+                                    dayIndex,
+                                    "fats",
+                                    e.target.value
+                                  )
+                                }
+                                className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                  isDarkMode
+                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                                }`}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-          <div className="text-center">
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 max-w-md mx-auto">
             <button
               type="submit"
-              className={`px-6 py-2 rounded-md transition-colors duration-200 ${
+              className={`w-full p-3 rounded-md transition-colors duration-200 ${
                 isDarkMode
                   ? "bg-red-800 text-white hover:bg-red-900"
                   : "bg-red-800 text-white hover:bg-red-900"
