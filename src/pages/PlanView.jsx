@@ -22,6 +22,20 @@ const PlanView = () => {
     fetchPlan();
   }, [id]);
 
+  const getWeekDate = (weekIndex) => {
+    if (!plan?.startDate) return "";
+    const start = new Date(plan.startDate);
+    start.setDate(start.getDate() + weekIndex * 7);
+    return start.toLocaleDateString();
+  };
+
+  const getDayDate = (weekIndex, dayIndex) => {
+    if (!plan?.startDate) return "";
+    const start = new Date(plan.startDate);
+    start.setDate(start.getDate() + weekIndex * 7 + dayIndex);
+    return start.toLocaleDateString();
+  };
+
   if (loading) {
     return (
       <div
@@ -73,7 +87,7 @@ const PlanView = () => {
                   isDarkMode ? "text-red-400" : "text-red-800"
                 }`}
               >
-                Week {week.week}
+                Week {week.week} ({getWeekDate(weekIndex)})
               </h2>
               {week.days.map((day, dayIndex) => (
                 <div
@@ -87,7 +101,7 @@ const PlanView = () => {
                       isDarkMode ? "text-red-400" : "text-red-800"
                     }`}
                   >
-                    {day.day}
+                    {day.day} ({getDayDate(weekIndex, dayIndex)})
                   </h3>
                   <div className="mt-2">
                     <h4
@@ -105,19 +119,6 @@ const PlanView = () => {
                         </li>
                       ))}
                     </ul>
-                  </div>
-                  <div className="mt-2">
-                    <h4
-                      className={`font-semibold mb-1 ${
-                        isDarkMode ? "text-red-400" : "text-red-800"
-                      }`}
-                    >
-                      Macro Goals:
-                    </h4>
-                    <p>
-                      Protein: {day.macros.protein}g, Carbs: {day.macros.carbs}
-                      g, Fats: {day.macros.fats}g
-                    </p>
                   </div>
                 </div>
               ))}

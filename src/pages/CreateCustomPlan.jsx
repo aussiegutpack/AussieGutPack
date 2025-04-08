@@ -9,46 +9,22 @@ const CreateCustomPlan = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useContext(ThemeContext);
   const [planName, setPlanName] = useState("");
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().split("T")[0]
+  ); // Default to today
   const [workouts, setWorkouts] = useState([]);
+  const [muscleGroups, setMuscleGroups] = useState({}); // Grouped workouts by muscle group
   const [weeks, setWeeks] = useState(
     Array.from({ length: 6 }, (_, i) => ({
       week: i + 1,
       days: [
-        {
-          day: "Monday",
-          workouts: [],
-          macros: { protein: 0, carbs: 0, fats: 0 },
-        },
-        {
-          day: "Tuesday",
-          workouts: [],
-          macros: { protein: 0, carbs: 0, fats: 0 },
-        },
-        {
-          day: "Wednesday",
-          workouts: [],
-          macros: { protein: 0, carbs: 0, fats: 0 },
-        },
-        {
-          day: "Thursday",
-          workouts: [],
-          macros: { protein: 0, carbs: 0, fats: 0 },
-        },
-        {
-          day: "Friday",
-          workouts: [],
-          macros: { protein: 0, carbs: 0, fats: 0 },
-        },
-        {
-          day: "Saturday",
-          workouts: [],
-          macros: { protein: 0, carbs: 0, fats: 0 },
-        },
-        {
-          day: "Sunday",
-          workouts: [],
-          macros: { protein: 0, carbs: 0, fats: 0 },
-        },
+        { day: "Monday", workouts: [] },
+        { day: "Tuesday", workouts: [] },
+        { day: "Wednesday", workouts: [] },
+        { day: "Thursday", workouts: [] },
+        { day: "Friday", workouts: [] },
+        { day: "Saturday", workouts: [] },
+        { day: "Sunday", workouts: [] },
       ],
     }))
   );
@@ -62,7 +38,19 @@ const CreateCustomPlan = () => {
         id: doc.id,
         ...doc.data(),
       }));
+
+      // Group workouts by muscleGroup
+      const groupedWorkouts = workoutList.reduce((acc, workout) => {
+        const muscleGroup = workout.muscleGroup || "Other"; // Default to "Other" if muscleGroup is missing
+        if (!acc[muscleGroup]) {
+          acc[muscleGroup] = [];
+        }
+        acc[muscleGroup].push(workout);
+        return acc;
+      }, {});
+
       setWorkouts(workoutList);
+      setMuscleGroups(groupedWorkouts);
     };
     fetchWorkouts();
   }, []);
@@ -95,22 +83,30 @@ const CreateCustomPlan = () => {
     setWeeks(newWeeks);
   };
 
-  const handleMacroChange = (weekIndex, dayIndex, macro, value) => {
-    const newWeeks = [...weeks];
-    newWeeks[weekIndex].days[dayIndex].macros[macro] = Number(value);
-    setWeeks(newWeeks);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const db = getFirestore();
     const newPlan = {
       userId: "anonymous",
       name: planName,
+      startDate: new Date(startDate).toISOString(),
       weeks,
     };
     const docRef = await addDoc(collection(db, "customPlans"), newPlan);
     navigate(`/fitness-tracker/plan/${docRef.id}`);
+  };
+
+  // Calculate the date for each week and day based on the start date
+  const getWeekDate = (weekIndex) => {
+    const start = new Date(startDate);
+    start.setDate(start.getDate() + weekIndex * 7); // Add 7 days for each week
+    return start.toLocaleDateString();
+  };
+
+  const getDayDate = (weekIndex, dayIndex) => {
+    const start = new Date(startDate);
+    start.setDate(start.getDate() + weekIndex * 7 + dayIndex); // Add days for the week and day
+    return start.toLocaleDateString();
   };
 
   return (
@@ -133,24 +129,48 @@ const CreateCustomPlan = () => {
               isDarkMode ? "bg-stone-800" : "bg-red-50"
             }`}
           >
-            <label
-              className={`block text-xl font-semibold mb-2 ${
-                isDarkMode ? "text-red-400" : "text-red-800"
-              }`}
-            >
-              Plan Name
-            </label>
-            <input
-              type="text"
-              value={planName}
-              onChange={(e) => setPlanName(e.target.value)}
-              className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 ${
-                isDarkMode
-                  ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                  : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-              }`}
-              required
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label
+                  className={`block text-xl font-semibold mb-2 ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  }`}
+                >
+                  Plan Name
+                </label>
+                <input
+                  type="text"
+                  value={planName}
+                  onChange={(e) => setPlanName(e.target.value)}
+                  className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 ${
+                    isDarkMode
+                      ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                      : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                  }`}
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  className={`block text-xl font-semibold mb-2 ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  }`}
+                >
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 ${
+                    isDarkMode
+                      ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
+                      : "bg-white border-red-200 text-red-800 focus:ring-red-800"
+                  }`}
+                  required
+                />
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {weeks.map((week, weekIndex) => (
@@ -171,7 +191,7 @@ const CreateCustomPlan = () => {
                       isDarkMode ? "text-red-400" : "text-red-800"
                     }`}
                   >
-                    Week {week.week}
+                    Week {week.week} ({getWeekDate(weekIndex)})
                   </h2>
                   {expandedWeeks[weekIndex] ? (
                     <ChevronUp
@@ -201,7 +221,7 @@ const CreateCustomPlan = () => {
                             isDarkMode ? "text-red-400" : "text-red-800"
                           }`}
                         >
-                          {day.day}
+                          {day.day} ({getDayDate(weekIndex, dayIndex)})
                         </h3>
                         <div className="mb-4">
                           <h4
@@ -234,11 +254,20 @@ const CreateCustomPlan = () => {
                                       : "bg-white border-red-200 text-red-800 focus:ring-red-800"
                                   }`}
                                 >
-                                  {workouts.map((w) => (
-                                    <option key={w.id} value={w.name}>
-                                      {w.name}
-                                    </option>
-                                  ))}
+                                  {Object.keys(muscleGroups).map(
+                                    (muscleGroup) => (
+                                      <optgroup
+                                        key={muscleGroup}
+                                        label={muscleGroup}
+                                      >
+                                        {muscleGroups[muscleGroup].map((w) => (
+                                          <option key={w.id} value={w.name}>
+                                            {w.name}
+                                          </option>
+                                        ))}
+                                      </optgroup>
+                                    )
+                                  )}
                                 </select>
                                 <input
                                   type="number"
@@ -302,95 +331,6 @@ const CreateCustomPlan = () => {
                           >
                             Add Workout
                           </button>
-                        </div>
-                        <div>
-                          <h4
-                            className={`text-base font-semibold mb-2 ${
-                              isDarkMode ? "text-red-400" : "text-red-800"
-                            }`}
-                          >
-                            Macro Goals:
-                          </h4>
-                          <div className="flex flex-col sm:flex-row sm:space-x-4">
-                            <div className="mb-3 sm:mb-0">
-                              <label
-                                className={`block text-sm font-medium mb-1 ${
-                                  isDarkMode ? "text-red-400" : "text-red-800"
-                                }`}
-                              >
-                                Protein (g)
-                              </label>
-                              <input
-                                type="number"
-                                value={day.macros.protein}
-                                onChange={(e) =>
-                                  handleMacroChange(
-                                    weekIndex,
-                                    dayIndex,
-                                    "protein",
-                                    e.target.value
-                                  )
-                                }
-                                className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                  isDarkMode
-                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                                }`}
-                              />
-                            </div>
-                            <div className="mb-3 sm:mb-0">
-                              <label
-                                className={`block text-sm font-medium mb-1 ${
-                                  isDarkMode ? "text-red-400" : "text-red-800"
-                                }`}
-                              >
-                                Carbs (g)
-                              </label>
-                              <input
-                                type="number"
-                                value={day.macros.carbs}
-                                onChange={(e) =>
-                                  handleMacroChange(
-                                    weekIndex,
-                                    dayIndex,
-                                    "carbs",
-                                    e.target.value
-                                  )
-                                }
-                                className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                  isDarkMode
-                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                                }`}
-                              />
-                            </div>
-                            <div>
-                              <label
-                                className={`block text-sm font-medium mb-1 ${
-                                  isDarkMode ? "text-red-400" : "text-red-800"
-                                }`}
-                              >
-                                Fats (g)
-                              </label>
-                              <input
-                                type="number"
-                                value={day.macros.fats}
-                                onChange={(e) =>
-                                  handleMacroChange(
-                                    weekIndex,
-                                    dayIndex,
-                                    "fats",
-                                    e.target.value
-                                  )
-                                }
-                                className={`w-full sm:w-20 p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                  isDarkMode
-                                    ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                                    : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-                                }`}
-                              />
-                            </div>
-                          </div>
                         </div>
                       </div>
                     ))}

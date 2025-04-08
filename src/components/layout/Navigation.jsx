@@ -15,9 +15,29 @@ function Navigation() {
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
     { name: "Fitness Tracker", href: "/fitness-tracker" },
+    { name: "Nutrition", href: "/fitness-tracker/nutrition" }, // Point to the new Nutrition page
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Helper function to determine if a nav item is active
+  const isActive = (href) => {
+    if (href === "/") {
+      return location.pathname === "/";
+    }
+    if (href === "/fitness-tracker") {
+      // Only highlight Fitness Tracker if the path is exactly /fitness-tracker or a subpath that isn't /fitness-tracker/nutrition
+      return (
+        location.pathname.startsWith(href) &&
+        !location.pathname.startsWith("/fitness-tracker/nutrition")
+      );
+    }
+    if (href === "/fitness-tracker/nutrition") {
+      // Highlight Nutrition only if the path is exactly /fitness-tracker/nutrition
+      return location.pathname === href;
+    }
+    return location.pathname.startsWith(href);
+  };
 
   return (
     <nav
@@ -72,8 +92,7 @@ function Navigation() {
               key={item.href}
               to={item.href}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
-                location.pathname === item.href ||
-                (item.href !== "/" && location.pathname.startsWith(item.href))
+                isActive(item.href)
                   ? isDarkMode
                     ? "bg-red-800 text-white"
                     : "bg-red-100 text-red-800"
@@ -121,8 +140,7 @@ function Navigation() {
               key={item.href}
               to={item.href}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
-                location.pathname === item.href ||
-                (item.href !== "/" && location.pathname.startsWith(item.href))
+                isActive(item.href)
                   ? isDarkMode
                     ? "bg-red-800 text-white"
                     : "bg-red-100 text-red-800"

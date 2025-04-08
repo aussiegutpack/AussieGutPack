@@ -5,8 +5,8 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import Products from "./pages/shop/Products";
-import Cart from "./pages/Cart"; // Import Cart
-import Checkout from "./pages/shop/Checkout"; // Existing Checkout route
+import Cart from "./pages/Cart";
+import Checkout from "./pages/shop/Checkout";
 import GutHealth from "./pages/content/GutHealth";
 import GutHealthDetail from "./pages/content/GutHealthDetail";
 import Purchase from "./pages/shop/Purchase";
@@ -18,11 +18,13 @@ import AdminPage from "./pages/AdminPage";
 import HomeAdminPage from "./pages/HomeAdminPage";
 import BlogAdminPage from "./pages/BlogAdminPage";
 import ProductsAdminPage from "./pages/ProductsAdminPage";
-import FitnessTracker from "./pages/FitnessTracker"; // Add Fitness Tracker page
-import PlanView from "./pages/PlanView"; // Add Plan View page
-import CreateCustomPlan from "./pages/CreateCustomPlan"; // Add Create Custom Plan page
-import LogFitness from "./pages/LogFitness"; // Add Log Fitness page
-import FitnessHistory from "./pages/FitnessHistory"; // Add Fitness History page
+import FitnessTracker from "./pages/FitnessTracker";
+import PlanView from "./pages/PlanView";
+import CreateCustomPlan from "./pages/CreateCustomPlan";
+import LogFitness from "./pages/LogFitness";
+import FitnessHistory from "./pages/FitnessHistory";
+import Nutrition from "./pages/Nutrition";
+import NutritionPlanView from "./pages/NutritionPlanView"; // Add this import
 import { CartProvider } from "./context/CartContext";
 import "./styles/global.css";
 
@@ -57,6 +59,7 @@ function App() {
                   <Route index element={<Home />} />
                   <Route path="products" element={<Products />} />
                   <Route path="cart" element={<Cart />} />
+                  <Route path="checkout" element={<Checkout />} />
                   <Route path="gut-health" element={<GutHealth />} />
                   <Route path="gut-health/:id" element={<GutHealthDetail />} />
                   <Route path="purchase" element={<Purchase />} />
@@ -85,6 +88,15 @@ function App() {
                     path="fitness-tracker/history"
                     element={<FitnessHistory />}
                   />
+                  <Route
+                    path="fitness-tracker/nutrition"
+                    element={<Nutrition />}
+                  />
+                  <Route
+                    path="fitness-tracker/nutrition-plan/:id"
+                    element={<NutritionPlanView />}
+                  />{" "}
+                  {/* Add this route */}
                   <Route path="*" element={<div>404 - Page Not Found</div>} />
                 </Route>
               </Routes>
