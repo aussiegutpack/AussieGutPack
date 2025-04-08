@@ -14,6 +14,7 @@ function Navigation() {
     { name: "Blog", href: "/blog" },
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
+    { name: "Fitness Tracker", href: "/fitness-tracker" },
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -71,7 +72,8 @@ function Navigation() {
               key={item.href}
               to={item.href}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
-                location.pathname === item.href
+                location.pathname === item.href ||
+                (item.href !== "/" && location.pathname.startsWith(item.href))
                   ? isDarkMode
                     ? "bg-red-800 text-white"
                     : "bg-red-100 text-red-800"
@@ -119,7 +121,8 @@ function Navigation() {
               key={item.href}
               to={item.href}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
-                location.pathname === item.href
+                location.pathname === item.href ||
+                (item.href !== "/" && location.pathname.startsWith(item.href))
                   ? isDarkMode
                     ? "bg-red-800 text-white"
                     : "bg-red-100 text-red-800"

@@ -18,6 +18,11 @@ import AdminPage from "./pages/AdminPage";
 import HomeAdminPage from "./pages/HomeAdminPage";
 import BlogAdminPage from "./pages/BlogAdminPage";
 import ProductsAdminPage from "./pages/ProductsAdminPage";
+import FitnessTracker from "./pages/FitnessTracker"; // Add Fitness Tracker page
+import PlanView from "./pages/PlanView"; // Add Plan View page
+import CreateCustomPlan from "./pages/CreateCustomPlan"; // Add Create Custom Plan page
+import LogFitness from "./pages/LogFitness"; // Add Log Fitness page
+import FitnessHistory from "./pages/FitnessHistory"; // Add Fitness History page
 import { CartProvider } from "./context/CartContext";
 import "./styles/global.css";
 
@@ -65,6 +70,20 @@ function App() {
                   <Route
                     path="admin/products"
                     element={<ProductsAdminPage />}
+                  />
+                  <Route path="fitness-tracker" element={<FitnessTracker />} />
+                  <Route
+                    path="fitness-tracker/plan/:id"
+                    element={<PlanView />}
+                  />
+                  <Route
+                    path="fitness-tracker/create-custom-plan"
+                    element={<CreateCustomPlan />}
+                  />
+                  <Route path="fitness-tracker/log" element={<LogFitness />} />
+                  <Route
+                    path="fitness-tracker/history"
+                    element={<FitnessHistory />}
                   />
                   <Route path="*" element={<div>404 - Page Not Found</div>} />
                 </Route>
