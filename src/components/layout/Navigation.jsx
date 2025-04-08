@@ -1,7 +1,7 @@
 // src/components/layout/Navigation.jsx
 import React, { useState, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Dog } from "lucide-react";
+import { Dog, Menu, X, Sun, Moon } from "lucide-react";
 import { ThemeContext } from "../../App";
 
 function Navigation() {
@@ -15,7 +15,7 @@ function Navigation() {
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
     { name: "Fitness Tracker", href: "/fitness-tracker" },
-    { name: "Nutrition", href: "/fitness-tracker/nutrition" }, // Point to the new Nutrition page
+    { name: "Nutrition", href: "/nutrition" }, // Updated to standalone /nutrition
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -26,65 +26,48 @@ function Navigation() {
       return location.pathname === "/";
     }
     if (href === "/fitness-tracker") {
-      // Only highlight Fitness Tracker if the path is exactly /fitness-tracker or a subpath that isn't /fitness-tracker/nutrition
-      return (
-        location.pathname.startsWith(href) &&
-        !location.pathname.startsWith("/fitness-tracker/nutrition")
-      );
+      return location.pathname.startsWith(href);
     }
-    if (href === "/fitness-tracker/nutrition") {
-      // Highlight Nutrition only if the path is exactly /fitness-tracker/nutrition
-      return location.pathname === href;
-    }
-    return location.pathname.startsWith(href);
+    return location.pathname === href; // Simplified logic for other pages
   };
+
+  // Debug: Log to check if the hamburger menu button is being rendered
+  console.log("Rendering Navigation component. isMenuOpen:", isMenuOpen);
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-20 shadow-md transition-colors duration-300 ease-in-out ${
-        isDarkMode ? "bg-stone-900 text-red-400" : "bg-white text-red-800"
+      className={`fixed top-0 left-0 w-full z-50 shadow-md transition-colors duration-300 ease-in-out ${
+        isDarkMode ? "bg-stone-900 text-red-400" : "bg-red-800 text-white"
       }`}
     >
-      <div className="container mx-auto px-4 py-4 flex items-center">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        {/* Logo and Title */}
+        <Link
+          to="/"
+          className="flex items-center space-x-2"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          <Dog
+            className={`w-6 h-6 ${isDarkMode ? "text-red-400" : "text-white"}`}
+          />
+          <span className="text-xl font-bold">Aussie Gut Pack</span>
+        </Link>
+
         {/* Hamburger Menu (Mobile) */}
-        <div className="md:hidden">
+        <div className="block md:hidden">
           <button
             onClick={toggleMenu}
             className="focus:outline-none"
             aria-label="Toggle menu"
           >
-            <span
-              className={`block w-6 h-1 mb-1.5 transition-all duration-300 ${
-                isDarkMode ? "bg-stone-400" : "bg-red-800"
-              } ${isMenuOpen ? "rotate-45 translate-y-2.5" : ""}`}
-            />
-            <span
-              className={`block w-6 h-1 mb-1.5 transition-all duration-300 ${
-                isDarkMode ? "bg-stone-400" : "bg-red-800"
-              } ${isMenuOpen ? "opacity-0" : ""}`}
-            />
-            <span
-              className={`block w-6 h-1 transition-all duration-300 ${
-                isDarkMode ? "bg-stone-400" : "bg-red-800"
-              } ${isMenuOpen ? "-rotate-45 -translate-y-2.5" : ""}`}
-            />
+            {isMenuOpen ? (
+              <X className="w-6 h-6 text-white" />
+            ) : (
+              <Menu className="w-6 h-6 text-white" />
+            )}
           </button>
         </div>
-        {/* Logo and Title (Centered on Mobile, Left on Desktop) */}
-        <div className="flex-grow text-center md:flex md:items-center md:text-left">
-          <Link
-            to="/"
-            className="flex justify-center md:justify-start items-center space-x-2"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <Dog
-              className={`w-6 h-6 ${
-                isDarkMode ? "text-stone-400" : "text-red-800"
-              }`}
-            />
-            <span className="text-xl font-bold">Aussie Gut Pack</span>
-          </Link>
-        </div>
+
         {/* Desktop Navigation Links and Theme Toggle */}
         <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
@@ -93,12 +76,8 @@ function Navigation() {
               to={item.href}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 isActive(item.href)
-                  ? isDarkMode
-                    ? "bg-red-800 text-white"
-                    : "bg-red-100 text-red-800"
-                  : isDarkMode
-                  ? "hover:bg-red-900"
-                  : "hover:bg-red-200"
+                  ? "bg-red-600 text-white"
+                  : "hover:bg-red-700"
               }`}
             >
               {item.name}
@@ -106,34 +85,28 @@ function Navigation() {
           ))}
           <button
             onClick={toggleTheme}
-            className={`px-3 py-2 rounded-md transition-colors duration-200 ${
+            className={`p-2 rounded-md transition-colors duration-200 ${
               isDarkMode
-                ? "bg-red-800 text-white hover:bg-red-900"
-                : "bg-red-800 text-white hover:bg-red-900"
+                ? "bg-red-800 hover:bg-red-900 W"
+                : "bg-red-700 hover:bg-red-800"
             }`}
+            aria-label="Toggle theme"
           >
-            {isDarkMode ? "Light" : "Dark"}
-          </button>
-        </div>
-        {/* Theme Toggle (Mobile) */}
-        <div className="md:hidden">
-          <button
-            onClick={toggleTheme}
-            className={`px-3 py-1 rounded-md transition-colors duration-200 ${
-              isDarkMode
-                ? "bg-red-800 text-white hover:bg-red-900"
-                : "bg-red-800 text-white hover:bg-red-900"
-            }`}
-          >
-            {isDarkMode ? "L" : "D"}
+            {isDarkMode ? (
+              <Sun className="w-6 h-6 text-white" />
+            ) : (
+              <Moon className="w-6 h-6 text-white" />
+            )}
           </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div
-          className={`md:hidden flex flex-col space-y-2 py-4 px-6 transition-colors duration-300 ease-in-out ${
-            isDarkMode ? "bg-stone-900 text-stone-400" : "bg-white text-red-800"
-          }`}
+          className={`block md:hidden flex flex-col space-y-2 py-4 px-6 transition-all duration-300 ease-in-out ${
+            isDarkMode ? "bg-stone-900 text-red-400" : "bg-red-800 text-white"
+          } border-t ${isDarkMode ? "border-stone-700" : "border-red-900"}`}
         >
           {navItems.map((item) => (
             <Link
@@ -141,18 +114,30 @@ function Navigation() {
               to={item.href}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 isActive(item.href)
-                  ? isDarkMode
-                    ? "bg-red-800 text-white"
-                    : "bg-red-100 text-red-800"
-                  : isDarkMode
-                  ? "hover:bg-red-900"
-                  : "hover:bg-red-200"
+                  ? "bg-red-600 text-white"
+                  : "hover:bg-red-700"
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
               {item.name}
             </Link>
           ))}
+          <button
+            onClick={toggleTheme}
+            className={`px-3 py-2 rounded-md transition-colors duration-200 flex items-center space-x-2 ${
+              isDarkMode
+                ? "bg-red-800 hover:bg-red-900"
+                : "bg-red-700 hover:bg-red-800"
+            }`}
+            aria-label="Toggle theme"
+          >
+            {isDarkMode ? (
+              <Sun className="w-6 h-6 text-white" />
+            ) : (
+              <Moon className="w-6 h-6 text-white" />
+            )}
+            <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+          </button>
         </div>
       )}
     </nav>
