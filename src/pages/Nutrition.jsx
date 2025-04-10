@@ -17,13 +17,17 @@ import {
 const Nutrition = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useContext(ThemeContext);
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   const [planName, setPlanName] = useState("");
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [meals, setMeals] = useState([]);
-  const [plans, setPlans] = useState([]); // To store user's existing plans
+  const [plans, setPlans] = useState([]);
+  const [mealsLoading, setMealsLoading] = useState(true);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [mealsError, setMealsError] = useState(null);
+  const [plansError, setPlansError] = useState(null);
   const [weeks, setWeeks] = useState(
     Array.from({ length: 6 }, (_, i) => ({
       week: i + 1,
@@ -80,6 +84,8 @@ const Nutrition = () => {
   useEffect(() => {
     const fetchMeals = async () => {
       try {
+        setMealsLoading(true);
+        setMealsError(null);
         const { data, error } = await supabase.from("foods").select("*");
         if (error) throw error;
         console.log("Fetched meals from Supabase 'foods' table:", data);
@@ -89,6 +95,9 @@ const Nutrition = () => {
         }
       } catch (error) {
         console.error("Error fetching meals:", error);
+        setMealsError("Failed to load meals. Please try again later.");
+      } finally {
+        setMealsLoading(false);
       }
     };
     fetchMeals();
@@ -99,14 +108,22 @@ const Nutrition = () => {
     const fetchPlans = async () => {
       if (!user) return;
       try {
+        setPlansLoading(true);
+        setPlansError(null);
         const { data, error } = await supabase
           .from("nutrition_plans")
-          .select("*");
+          .select("*")
+          .eq("user_id", user.id); // Filter by user_id
         if (error) throw error;
         console.log("Fetched nutrition plans from Supabase:", data);
         setPlans(data);
       } catch (error) {
         console.error("Error fetching nutrition plans:", error);
+        setPlansError(
+          "Failed to load your nutrition plans. Please try again later."
+        );
+      } finally {
+        setPlansLoading(false);
       }
     };
     fetchPlans();
@@ -252,10 +269,10 @@ const Nutrition = () => {
 
     try {
       const newPlan = {
-        user_id: user.id, // Use Supabase user ID
+        user_id: user.id,
         name: planName,
         start_date: new Date(startDate).toISOString().split("T")[0],
-        weeks: JSON.stringify(weeks), // Store weeks as JSON
+        weeks: JSON.stringify(weeks),
       };
       const { data, error } = await supabase
         .from("nutrition_plans")
@@ -269,10 +286,26 @@ const Nutrition = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="container mx-auto px-4 py-10 text-center text-lg">
-        Loading...
+        <ClipLoader color={isDarkMode ? "#f87171" : "#b91c1c"} />
+      </div>
+    );
+  }
+
+  if (mealsLoading || plansLoading) {
+    return (
+      <div className="container mx-auto px-4 py-10 text-center text-lg">
+        <ClipLoader color={isDarkMode ? "#f87171" : "#b91c1c"} />
+      </div>
+    );
+  }
+
+  if (mealsError) {
+    return (
+      <div className="container mx-auto px-4 py-10 text-center text-lg text-red-500">
+        {mealsError}
       </div>
     );
   }
@@ -288,7 +321,9 @@ const Nutrition = () => {
       </h1>
 
       {/* Display Existing Plans */}
-      {plans.length > 0 && (
+      {plansError ? (
+        <div className="text-center text-red-500 mb-12">{plansError}</div>
+      ) : plans.length > 0 ? (
         <div className="mb-12">
           <h2
             className={`text-3xl font-bold mb-6 ${
@@ -325,6 +360,10 @@ const Nutrition = () => {
               </div>
             ))}
           </div>
+        </div>
+      ) : (
+        <div className="text-center text-lg mb-12">
+          No nutrition plans yet. Create one below!
         </div>
       )}
 

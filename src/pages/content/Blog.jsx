@@ -5,6 +5,7 @@ import { ThemeContext } from "../../App";
 import Card from "../../components/ui/Card";
 import { db } from "../../firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { ClipLoader } from "react-spinners";
 
 const Blog = () => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -21,11 +22,10 @@ const Blog = () => {
           id: doc.id,
           title: doc.data().title,
           blocks: doc.data().blocks || [{ type: "paragraph", content: "" }],
-          lastEdited: doc.data().lastEdited || "", // Fetch lastEdited
+          lastEdited: doc.data().lastEdited || "",
         }));
         console.log("Fetched blog posts:", blogData);
         if (blogData.length > 0) {
-          // Sort by lastEdited (newest first)
           const sortedBlogData = blogData.sort((a, b) => {
             const lastEditedA = a.lastEdited
               ? new Date(a.lastEdited)
@@ -41,8 +41,8 @@ const Blog = () => {
         }
       } catch (err) {
         console.error("Error fetching blog posts:", err);
-        setError("Failed to load blog posts: " + err.message);
-        setBlogPosts([]); // No fallback posts, just show empty state
+        setError("Failed to load blog posts. Please try again later.");
+        setBlogPosts([]);
       } finally {
         setLoading(false);
       }
@@ -61,7 +61,7 @@ const Blog = () => {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
-    }); // e.g., "4/3/2025, 4:11 PM"
+    });
   };
 
   const getExcerpt = (post) => {
@@ -98,13 +98,9 @@ const Blog = () => {
         >
           Our Blog
         </h1>
-        <p
-          className={`text-lg transition-colors duration-300 ease-in-out ${
-            isDarkMode ? "text-stone-300" : "text-stone-600"
-          }`}
-        >
-          Loading posts...
-        </p>
+        <div className="text-center">
+          <ClipLoader color={isDarkMode ? "#f87171" : "#b91c1c"} />
+        </div>
       </div>
     );
   }
@@ -124,7 +120,7 @@ const Blog = () => {
           Our Blog
         </h1>
         <p
-          className={`text-lg transition-colors duration-300 ease-in-out ${
+          className={`text-lg text-center transition-colors duration-300 ease-in-out ${
             isDarkMode ? "text-red-400" : "text-red-600"
           }`}
         >

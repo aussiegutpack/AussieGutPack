@@ -3,30 +3,39 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { ThemeContext } from "../App";
+import { ClipLoader } from "react-spinners";
 import { ChevronDown, ChevronUp, CheckCircle, XCircle } from "lucide-react";
 
 const NutritionPlanView = () => {
   const { id } = useParams();
   const { isDarkMode } = useContext(ThemeContext);
   const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [expandedWeeks, setExpandedWeeks] = useState([]);
 
   useEffect(() => {
     const fetchPlan = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const { data, error } = await supabase
           .from("nutrition_plans")
           .select("*")
           .eq("id", id)
           .single();
         if (error) throw error;
+        const weeks = JSON.parse(data.weeks);
         setPlan({
           ...data,
-          weeks: JSON.parse(data.weeks), // Parse the JSON string back into an object
+          weeks,
         });
-        setExpandedWeeks(Array(JSON.parse(data.weeks).length).fill(false));
+        setExpandedWeeks(Array(weeks.length).fill(false));
       } catch (error) {
         console.error("Error fetching nutrition plan:", error);
+        setError("Failed to load nutrition plan. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchPlan();
@@ -73,10 +82,26 @@ const NutritionPlanView = () => {
     return start.toLocaleDateString();
   };
 
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-10 text-center text-lg">
+        <ClipLoader color={isDarkMode ? "#f87171" : "#b91c1c"} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-10 text-center text-lg text-red-500">
+        {error}
+      </div>
+    );
+  }
+
   if (!plan) {
     return (
       <div className="container mx-auto px-4 py-10 text-center text-lg">
-        Loading...
+        Nutrition plan not found.
       </div>
     );
   }

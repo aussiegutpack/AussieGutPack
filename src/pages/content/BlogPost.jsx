@@ -5,20 +5,32 @@ import { ThemeContext } from "../../App";
 import Button from "../../components/ui/Button";
 import { db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { ClipLoader } from "react-spinners";
 
 const BlogPost = () => {
   const { id } = useParams();
   const { isDarkMode } = useContext(ThemeContext);
   const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPost = async () => {
-      const postDocRef = doc(db, "content", "blog", "posts", id);
-      const postDocSnap = await getDoc(postDocRef);
-      if (postDocSnap.exists()) {
-        setPost({ id: postDocSnap.id, ...postDocSnap.data() });
-      } else {
-        setPost(null); // No fallback, just show "Post Not Found"
+      try {
+        setLoading(true);
+        setError(null);
+        const postDocRef = doc(db, "content", "blog", "posts", id);
+        const postDocSnap = await getDoc(postDocRef);
+        if (postDocSnap.exists()) {
+          setPost({ id: postDocSnap.id, ...postDocSnap.data() });
+        } else {
+          setPost(null);
+        }
+      } catch (err) {
+        console.error("Error fetching blog post:", err);
+        setError("Failed to load blog post. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchPost();
@@ -35,8 +47,54 @@ const BlogPost = () => {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
-    }); // e.g., "4/3/2025, 4:11 PM"
+    });
   };
+
+  if (loading) {
+    return (
+      <div
+        className={`min-h-screen container mx-auto px-6 py-12 ${
+          isDarkMode ? "bg-stone-900" : "bg-stone-50"
+        }`}
+      >
+        <div className="text-center">
+          <ClipLoader color={isDarkMode ? "#f87171" : "#b91c1c"} />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className={`min-h-screen container mx-auto px-6 py-12 ${
+          isDarkMode ? "bg-stone-900" : "bg-stone-50"
+        }`}
+      >
+        <h1
+          className={`text-4xl font-bold mb-6 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
+          }`}
+        >
+          Error
+        </h1>
+        <p
+          className={`text-lg text-center transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-600"
+          }`}
+        >
+          {error}
+        </p>
+        <Button
+          to="/blog"
+          variant="primary"
+          className="mt-4 bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors duration-300 ease-in-out"
+        >
+          Back to Blog
+        </Button>
+      </div>
+    );
+  }
 
   if (!post) {
     return (
