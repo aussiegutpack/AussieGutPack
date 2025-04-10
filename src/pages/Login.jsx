@@ -1,107 +1,154 @@
 // src/pages/Login.jsx
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../App";
+import { FaSpinner } from "react-icons/fa";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { login, signup } = useContext(AuthContext);
-  const { isDarkMode } = useContext(ThemeContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isSignup, setIsSignup] = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { login } = useContext(AuthContext);
+  const { isDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setError(null);
+    setLoading(true);
+
     try {
-      if (isSignup) {
-        await signup(email, password);
-      } else {
-        await login(email, password);
-      }
-      navigate("/fitness-tracker");
+      await login(email, password);
+      // Check if the user was redirected from a protected route
+      const from = location.state?.from?.pathname || "/profile";
+      navigate(from, { replace: true }); // Redirect to the original location or /profile
     } catch (err) {
       setError(err.message);
+      console.error("Login error:", err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-10">
+    <div className="container mx-auto px-4 py-12">
       <h1
-        className={`text-4xl font-bold text-center mb-8 ${
+        className={`text-4xl md:text-5xl font-extrabold text-center mb-10 tracking-tight ${
           isDarkMode ? "text-red-400" : "text-red-800"
         }`}
       >
-        {isSignup ? "Sign Up" : "Login"}
+        Login
       </h1>
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-        <div className="mb-4">
-          <label
-            className={`block text-xl font-semibold mb-2 ${
-              isDarkMode ? "text-red-400" : "text-red-800"
-            }`}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 ${
-              isDarkMode
-                ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-            }`}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            className={`block text-xl font-semibold mb-2 ${
-              isDarkMode ? "text-red-400" : "text-red-800"
-            }`}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 ${
-              isDarkMode
-                ? "bg-stone-800 border-stone-600 text-red-400 focus:ring-red-800"
-                : "bg-white border-red-200 text-red-800 focus:ring-red-800"
-            }`}
-            required
-          />
-        </div>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <button
-          type="submit"
-          className={`w-full p-3 rounded-md transition-colors duration-200 ${
-            isDarkMode
-              ? "bg-red-800 text-white hover:bg-red-900"
-              : "bg-red-800 text-white hover:bg-red-900"
-          }`}
-        >
-          {isSignup ? "Sign Up" : "Login"}
-        </button>
-        <p className="mt-4 text-center">
-          {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+      <div
+        className={`max-w-md mx-auto p-6 rounded-lg shadow-md ${
+          isDarkMode ? "bg-stone-800 text-red-400" : "bg-white text-red-800"
+        }`}
+      >
+        <form onSubmit={handleLogin}>
+          <div className="mb-4">
+            <label
+              className={`block text-lg font-semibold mb-2 ${
+                isDarkMode ? "text-red-400" : "text-red-800"
+              } tracking-wide`}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${
+                isDarkMode
+                  ? "bg-stone-700 border-stone-600 text-red-400 focus:ring-red-600"
+                  : "bg-white border-red-200 text-red-800 focus:ring-red-600"
+              } placeholder-stone-400`}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              className={`block text-lg font-semibold mb-2 ${
+                isDarkMode ? "text-red-400" : "text-red-800"
+              } tracking-wide`}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${
+                isDarkMode
+                  ? "bg-stone-700 border-stone-600 text-red-400 focus:ring-red-600"
+                  : "bg-white border-red-200 text-red-800 focus:ring-red-600"
+              } placeholder-stone-400`}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+          {error && (
+            <p
+              className={`text-center text-sm mb-4 ${
+                isDarkMode ? "text-red-400" : "text-red-800"
+              }`}
+            >
+              {error}
+            </p>
+          )}
           <button
-            type="button"
-            onClick={() => setIsSignup(!isSignup)}
-            className={`hover:underline ${
-              isDarkMode ? "text-red-400" : "text-red-800"
+            type="submit"
+            disabled={loading}
+            className={`w-full p-3 rounded-lg font-semibold text-lg flex items-center justify-center ${
+              isDarkMode
+                ? "bg-red-700 text-white hover:bg-red-800"
+                : "bg-red-600 text-white hover:bg-red-700"
+            } transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {loading ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" />
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
+          </button>
+        </form>
+        <div className="mt-4 text-center">
+          <Link
+            to="/forgot-password"
+            className={`text-sm hover:underline ${
+              isDarkMode
+                ? "text-red-400 hover:text-red-300"
+                : "text-red-800 hover:text-red-600"
             }`}
           >
-            {isSignup ? "Login" : "Sign Up"}
-          </button>
-        </p>
-      </form>
+            Forgot Password?
+          </Link>
+        </div>
+        <div className="mt-2 text-center">
+          <p
+            className={`text-sm ${
+              isDarkMode ? "text-stone-300" : "text-stone-600"
+            }`}
+          >
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className={`hover:underline ${
+                isDarkMode
+                  ? "text-red-400 hover:text-red-300"
+                  : "text-red-800 hover:text-red-600"
+              }`}
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

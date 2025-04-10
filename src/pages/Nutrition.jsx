@@ -1,7 +1,7 @@
 // src/pages/Nutrition.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
+import { supabase } from "../supabaseClient";
 import { ThemeContext } from "../App";
 import { AuthContext } from "../context/AuthContext";
 import {
@@ -22,6 +22,7 @@ const Nutrition = () => {
     new Date().toISOString().split("T")[0]
   );
   const [meals, setMeals] = useState([]);
+  const [plans, setPlans] = useState([]); // To store user's existing plans
   const [weeks, setWeeks] = useState(
     Array.from({ length: 6 }, (_, i) => ({
       week: i + 1,
@@ -74,19 +75,16 @@ const Nutrition = () => {
   const [expandedWeeks, setExpandedWeeks] = useState(Array(6).fill(false));
   const [editingMeal, setEditingMeal] = useState(null);
 
+  // Fetch meals from Supabase
   useEffect(() => {
     const fetchMeals = async () => {
       try {
-        const db = getFirestore();
-        const mealsSnapshot = await getDocs(collection(db, "foods"));
-        const mealList = mealsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log("Fetched meals from 'foods' collection:", mealList);
-        setMeals(mealList);
-        if (mealList.length === 0) {
-          console.warn("No meals found in Firestore 'foods' collection.");
+        const { data, error } = await supabase.from("foods").select("*");
+        if (error) throw error;
+        console.log("Fetched meals from Supabase 'foods' table:", data);
+        setMeals(data);
+        if (data.length === 0) {
+          console.warn("No meals found in Supabase 'foods' table.");
         }
       } catch (error) {
         console.error("Error fetching meals:", error);
@@ -94,6 +92,24 @@ const Nutrition = () => {
     };
     fetchMeals();
   }, []);
+
+  // Fetch user's existing nutrition plans from Supabase
+  useEffect(() => {
+    const fetchPlans = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from("nutrition_plans")
+          .select("*");
+        if (error) throw error;
+        console.log("Fetched nutrition plans from Supabase:", data);
+        setPlans(data);
+      } catch (error) {
+        console.error("Error fetching nutrition plans:", error);
+      }
+    };
+    fetchPlans();
+  }, [user]);
 
   // Group meals by category
   const groupedMeals = meals.reduce((acc, meal) => {
@@ -116,7 +132,7 @@ const Nutrition = () => {
 
   const handleAddMeal = (weekIndex, dayIndex) => {
     if (meals.length === 0) {
-      alert("No meals available to add. Please add meals in Firestore.");
+      alert("No meals available to add. Please add meals in Supabase.");
       return;
     }
     const newWeeks = [...weeks];
@@ -232,15 +248,24 @@ const Nutrition = () => {
       navigate("/login");
       return;
     }
-    const db = getFirestore();
-    const newPlan = {
-      userId: user.uid,
-      name: planName,
-      startDate: new Date(startDate).toISOString(),
-      weeks,
-    };
-    const docRef = await addDoc(collection(db, "nutritionPlans"), newPlan);
-    navigate(`/nutrition-plan/${docRef.id}`);
+
+    try {
+      const newPlan = {
+        user_id: user.id, // Use Supabase user ID
+        name: planName,
+        start_date: new Date(startDate).toISOString().split("T")[0],
+        weeks: JSON.stringify(weeks), // Store weeks as JSON
+      };
+      const { data, error } = await supabase
+        .from("nutrition_plans")
+        .insert(newPlan)
+        .select();
+      if (error) throw error;
+      navigate(`/nutrition-plan/${data[0].id}`);
+    } catch (error) {
+      console.error("Error saving nutrition plan:", error);
+      alert("Failed to save nutrition plan. Please try again.");
+    }
   };
 
   if (loading) {
@@ -260,6 +285,48 @@ const Nutrition = () => {
       >
         Create Your Nutrition Plan
       </h1>
+
+      {/* Display Existing Plans */}
+      {plans.length > 0 && (
+        <div className="mb-12">
+          <h2
+            className={`text-3xl font-bold mb-6 ${
+              isDarkMode ? "text-red-400" : "text-red-800"
+            } tracking-tight`}
+          >
+            Your Nutrition Plans
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                className={`p-6 rounded-xl shadow-lg cursor-pointer transition-all duration-200 ${
+                  isDarkMode
+                    ? "bg-stone-800/90 hover:bg-stone-700"
+                    : "bg-red-50/90 hover:bg-red-100"
+                } border ${isDarkMode ? "border-stone-700" : "border-red-200"}`}
+                onClick={() => navigate(`/nutrition-plan/${plan.id}`)}
+              >
+                <h3
+                  className={`text-xl font-semibold ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  } tracking-tight`}
+                >
+                  {plan.name}
+                </h3>
+                <p
+                  className={`text-sm mt-2 ${
+                    isDarkMode ? "text-stone-400" : "text-stone-600"
+                  }`}
+                >
+                  Start Date: {plan.start_date}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         <div
           className={`mb-10 p-6 rounded-xl shadow-lg ${
@@ -476,7 +543,7 @@ const Nutrition = () => {
                               isDarkMode ? "text-red-400" : "text-red-800"
                             }`}
                           >
-                            No meals available. Please add meals in Firestore.
+                            No meals available. Please add meals in Supabase.
                           </p>
                         ) : day.meals.length > 0 ? (
                           day.meals.map((meal, mealIndex) => (

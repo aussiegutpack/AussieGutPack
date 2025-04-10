@@ -1,147 +1,245 @@
 // src/components/layout/Navigation.jsx
 import React, { useState, useContext } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Dog, Menu, X, Sun, Moon } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import { ThemeContext } from "../../App";
 
-function Navigation() {
-  const location = useLocation();
+const Navigation = ({ location }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const { user, logout, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const navItems = [
-    { name: "Home", href: "/" },
-    { name: "Blog", href: "/blog" },
-    { name: "Products", href: "/products" },
-    { name: "Contact", href: "/contact" },
-    { name: "Fitness Tracker", href: "/fitness-tracker" },
-    { name: "Nutrition", href: "/nutrition" }, // Updated to standalone /nutrition
-  ];
+  console.log("Rendering Navigation component. isMenuOpen:", isMenuOpen);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  // Helper function to determine if a nav item is active
-  const isActive = (href) => {
-    if (href === "/") {
-      return location.pathname === "/";
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout error:", err.message);
     }
-    if (href === "/fitness-tracker") {
-      return location.pathname.startsWith(href);
-    }
-    return location.pathname === href; // Simplified logic for other pages
   };
 
-  // Debug: Log to check if the hamburger menu button is being rendered
-  console.log("Rendering Navigation component. isMenuOpen:", isMenuOpen);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Helper function to determine if a link is active
+  const isActive = (path) => location.pathname === path;
+
+  // Get the username from user_metadata, fallback to "User" if not set
+  const username = user?.user_metadata?.displayName || "User";
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-50 shadow-md transition-colors duration-300 ease-in-out ${
-        isDarkMode ? "bg-stone-900 text-red-400" : "bg-red-800 text-white"
-      }`}
+      className={`sticky top-0 z-50 shadow-md ${
+        isDarkMode ? "bg-stone-900 text-red-400" : "bg-white text-red-800"
+      } transition-colors duration-300`}
     >
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        {/* Logo and Title */}
-        <Link
-          to="/"
-          className="flex items-center space-x-2"
-          onClick={() => setIsMenuOpen(false)}
-        >
-          <Dog
-            className={`w-6 h-6 ${isDarkMode ? "text-red-400" : "text-white"}`}
-          />
-          <span className="text-xl font-bold">Aussie Gut Pack</span>
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link to="/" className="text-2xl font-bold tracking-tight">
+          Aussie Gut Pack
         </Link>
 
-        {/* Hamburger Menu (Mobile) */}
-        <div className="block md:hidden">
-          <button
-            onClick={toggleMenu}
-            className="focus:outline-none"
-            aria-label="Toggle menu"
+        {/* Desktop Menu */}
+        <div className="hidden md:flex space-x-6 items-center">
+          <Link
+            to="/"
+            className={`hover:text-red-600 transition-colors duration-200 ${
+              isActive("/") ? "text-red-600 font-semibold" : ""
+            }`}
           >
-            {isMenuOpen ? (
-              <X className="w-6 h-6 text-white" />
-            ) : (
-              <Menu className="w-6 h-6 text-white" />
-            )}
+            Home
+          </Link>
+          <Link
+            to="/products"
+            className={`hover:text-red-600 transition-colors duration-200 ${
+              isActive("/products") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Products
+          </Link>
+
+          <Link
+            to="/blog"
+            className={`hover:text-red-600 transition-colors duration-200 ${
+              isActive("/blog") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Blog
+          </Link>
+
+          <Link
+            to="/contact"
+            className={`hover:text-red-600 transition-colors duration-200 ${
+              isActive("/contact") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Contact
+          </Link>
+
+          {/* Auth Links */}
+          {loading ? (
+            <span>Loading...</span>
+          ) : user ? (
+            <>
+              <Link
+                to="/profile"
+                className={`text-sm hover:text-red-600 transition-colors duration-200 ${
+                  isActive("/profile") ? "text-red-600 font-semibold" : ""
+                }`}
+              >
+                Welcome, {username} {/* Display username instead of email */}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
+            >
+              Login
+            </Link>
+          )}
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors duration-200"
+          >
+            {isDarkMode ? "☀️" : "🌙"}
           </button>
         </div>
 
-        {/* Desktop Navigation Links and Theme Toggle */}
-        <div className="hidden md:flex items-center space-x-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={`px-3 py-2 rounded-md transition-colors duration-200 ${
-                isActive(item.href)
-                  ? "bg-red-600 text-white"
-                  : "hover:bg-red-700"
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-md transition-colors duration-200 ${
-              isDarkMode
-                ? "bg-red-800 hover:bg-red-900 W"
-                : "bg-red-700 hover:bg-red-800"
-            }`}
-            aria-label="Toggle theme"
-          >
-            {isDarkMode ? (
-              <Sun className="w-6 h-6 text-white" />
-            ) : (
-              <Moon className="w-6 h-6 text-white" />
-            )}
-          </button>
-        </div>
+        {/* Mobile Menu Button */}
+        <button
+          onClick={toggleMenu}
+          className="md:hidden p-2 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors duration-200"
+        >
+          {isMenuOpen ? "✖" : "☰"}
+        </button>
       </div>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div
-          className={`block md:hidden flex flex-col space-y-2 py-4 px-6 transition-all duration-300 ease-in-out ${
-            isDarkMode ? "bg-stone-900 text-red-400" : "bg-red-800 text-white"
-          } border-t ${isDarkMode ? "border-stone-700" : "border-red-900"}`}
-        >
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={`px-3 py-2 rounded-md transition-colors duration-200 ${
-                isActive(item.href)
-                  ? "bg-red-600 text-white"
-                  : "hover:bg-red-700"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {item.name}
-            </Link>
-          ))}
-          <button
-            onClick={toggleTheme}
-            className={`px-3 py-2 rounded-md transition-colors duration-200 flex items-center space-x-2 ${
-              isDarkMode
-                ? "bg-red-800 hover:bg-red-900"
-                : "bg-red-700 hover:bg-red-800"
+        <div className="md:hidden px-4 py-2 border-t border-stone-200 dark:border-stone-700">
+          <Link
+            to="/"
+            onClick={toggleMenu}
+            className={`block py-2 hover:text-red-600 transition-colors duration-200 ${
+              isActive("/") ? "text-red-600 font-semibold" : ""
             }`}
-            aria-label="Toggle theme"
           >
-            {isDarkMode ? (
-              <Sun className="w-6 h-6 text-white" />
-            ) : (
-              <Moon className="w-6 h-6 text-white" />
-            )}
-            <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+            Home
+          </Link>
+          <Link
+            to="/products"
+            onClick={toggleMenu}
+            className={`block py-2 hover:text-red-600 transition-colors duration-200 ${
+              isActive("/products") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Products
+          </Link>
+
+          <Link
+            to="/blog"
+            onClick={toggleMenu}
+            className={`block py-2 hover:text-red-600 transition-colors duration-200 ${
+              isActive("/blog") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Blog
+          </Link>
+          <Link
+            to="/faq"
+            onClick={toggleMenu}
+            className={`block py-2 hover:text-red-600 transition-colors duration-200 ${
+              isActive("/faq") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            FAQ
+          </Link>
+          <Link
+            to="/contact"
+            onClick={toggleMenu}
+            className={`block py-2 hover:text-red-600 transition-colors duration-200 ${
+              isActive("/contact") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Contact
+          </Link>
+          <Link
+            to="/nutrition"
+            onClick={toggleMenu}
+            className={`block py-2 hover:text-red-600 transition-colors duration-200 ${
+              isActive("/nutrition") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Nutrition
+          </Link>
+
+          {/* Profile Link in Mobile Menu */}
+          {user && (
+            <Link
+              to="/profile"
+              onClick={toggleMenu}
+              className={`block py-2 hover:text-red-600 transition-colors duration-200 ${
+                isActive("/profile") ? "text-red-600 font-semibold" : ""
+              }`}
+            >
+              Profile
+            </Link>
+          )}
+
+          {/* Theme Toggle */}
+          <button
+            onClick={() => {
+              toggleTheme();
+              toggleMenu();
+            }}
+            className="block py-2 hover:text-red-600 transition-colors duration-200"
+          >
+            {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
           </button>
+
+          {/* Auth Links */}
+          {loading ? (
+            <span className="block py-2">Loading...</span>
+          ) : user ? (
+            <>
+              <span className="block py-2 text-sm">
+                Welcome, {username} {/* Display username instead of email */}
+              </span>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  toggleMenu();
+                }}
+                className="block py-2 text-left w-full text-white bg-red-600 hover:bg-red-700 rounded-lg px-4 transition-colors duration-200"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              onClick={toggleMenu}
+              className="block py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg px-4 transition-colors duration-200"
+            >
+              Login
+            </Link>
+          )}
         </div>
       )}
     </nav>
   );
-}
+};
 
 export default Navigation;

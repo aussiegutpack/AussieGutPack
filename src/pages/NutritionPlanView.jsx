@@ -1,68 +1,41 @@
 // src/pages/NutritionPlanView.jsx
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { useParams } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 import { ThemeContext } from "../App";
-import { AuthContext } from "../context/AuthContext";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle, XCircle } from "lucide-react";
 
 const NutritionPlanView = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { isDarkMode } = useContext(ThemeContext);
-  const { user, loading } = useContext(AuthContext);
   const [plan, setPlan] = useState(null);
   const [expandedWeeks, setExpandedWeeks] = useState([]);
-  const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 
   useEffect(() => {
     const fetchPlan = async () => {
       try {
-        const db = getFirestore();
-        const planDoc = await getDoc(doc(db, "nutritionPlans", id));
-        if (planDoc.exists()) {
-          const planData = planDoc.data();
-          if (planData.userId !== user?.uid) {
-            alert("You do not have permission to view this plan.");
-            navigate("/nutrition");
-            return;
-          }
-          setPlan(planData);
-          setExpandedWeeks(Array(planData.weeks.length).fill(false));
-        } else {
-          console.error("Plan not found");
-          navigate("/nutrition");
-        }
+        const { data, error } = await supabase
+          .from("nutrition_plans")
+          .select("*")
+          .eq("id", id)
+          .single();
+        if (error) throw error;
+        setPlan({
+          ...data,
+          weeks: JSON.parse(data.weeks), // Parse the JSON string back into an object
+        });
+        setExpandedWeeks(Array(JSON.parse(data.weeks).length).fill(false));
       } catch (error) {
-        console.error("Error fetching plan:", error);
-        navigate("/nutrition");
+        console.error("Error fetching nutrition plan:", error);
       }
     };
-
-    if (!loading && user) {
-      fetchPlan();
-    } else if (!loading && !user) {
-      alert("Please log in to view your nutrition plan.");
-      navigate("/login");
-    }
-  }, [id, user, loading, navigate]);
+    fetchPlan();
+  }, [id]);
 
   const toggleWeek = (weekIndex) => {
     const newExpandedWeeks = [...expandedWeeks];
     newExpandedWeeks[weekIndex] = !newExpandedWeeks[weekIndex];
     setExpandedWeeks(newExpandedWeeks);
-  };
-
-  const getWeekDate = (weekIndex) => {
-    const start = new Date(plan.startDate);
-    start.setDate(start.getDate() + weekIndex * 7);
-    return start.toLocaleDateString();
-  };
-
-  const getDayDate = (weekIndex, dayIndex) => {
-    const start = new Date(plan.startDate);
-    start.setDate(start.getDate() + weekIndex * 7 + dayIndex);
-    return start.toLocaleDateString();
   };
 
   const calculateLoggedMacros = (loggedMeals) => {
@@ -88,134 +61,171 @@ const NutritionPlanView = () => {
     };
   };
 
-  if (loading) {
-    return <div className="container mx-auto px-4 py-10">Loading...</div>;
-  }
+  const getWeekDate = (weekIndex) => {
+    const start = new Date(plan.start_date);
+    start.setDate(start.getDate() + weekIndex * 7);
+    return start.toLocaleDateString();
+  };
+
+  const getDayDate = (weekIndex, dayIndex) => {
+    const start = new Date(plan.start_date);
+    start.setDate(start.getDate() + weekIndex * 7 + dayIndex);
+    return start.toLocaleDateString();
+  };
 
   if (!plan) {
-    return <div className="container mx-auto px-4 py-10">Loading plan...</div>;
+    return (
+      <div className="container mx-auto px-4 py-10 text-center text-lg">
+        Loading...
+      </div>
+    );
   }
 
+  const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snacks"];
+
   return (
-    <div className="container mx-auto px-4 py-10">
+    <div className="container mx-auto px-4 py-12">
       <h1
-        className={`text-4xl font-bold text-center mb-8 ${
+        className={`text-4xl md:text-5xl font-extrabold text-center mb-10 tracking-tight ${
           isDarkMode ? "text-red-400" : "text-red-800"
         }`}
       >
         {plan.name}
       </h1>
       <p
-        className={`text-center mb-8 ${
-          isDarkMode ? "text-red-400" : "text-red-800"
+        className={`text-center text-lg mb-10 ${
+          isDarkMode ? "text-stone-400" : "text-stone-600"
         }`}
       >
-        Start Date: {new Date(plan.startDate).toLocaleDateString()}
+        Start Date: {new Date(plan.start_date).toLocaleDateString()}
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {plan.weeks.map((week, weekIndex) => (
           <div
             key={weekIndex}
-            className={`p-6 rounded-lg shadow-md ${
-              isDarkMode ? "bg-stone-800" : "bg-red-50"
-            }`}
+            className={`p-6 rounded-xl shadow-lg ${
+              isDarkMode ? "bg-stone-800/90" : "bg-red-50/90"
+            } backdrop-blur-sm border ${
+              isDarkMode ? "border-stone-700" : "border-red-200"
+            } transition-all duration-300`}
           >
             <div
-              className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 ${
+              className={`flex justify-between items-center cursor-pointer p-4 rounded-lg transition-colors duration-200 ${
                 isDarkMode ? "hover:bg-stone-700" : "hover:bg-red-100"
               }`}
               onClick={() => toggleWeek(weekIndex)}
             >
               <h2
-                className={`text-2xl font-semibold ${
+                className={`text-2xl font-bold ${
                   isDarkMode ? "text-red-400" : "text-red-800"
-                }`}
+                } tracking-tight`}
               >
-                Week {week.week} ({getWeekDate(weekIndex)})
+                Week {week.week}{" "}
+                <span className="text-sm font-normal">
+                  ({getWeekDate(weekIndex)})
+                </span>
               </h2>
               {expandedWeeks[weekIndex] ? (
                 <ChevronUp
                   className={`w-6 h-6 ${
                     isDarkMode ? "text-red-400" : "text-red-800"
-                  }`}
+                  } transition-transform duration-200`}
                 />
               ) : (
                 <ChevronDown
                   className={`w-6 h-6 ${
                     isDarkMode ? "text-red-400" : "text-red-800"
-                  }`}
+                  } transition-transform duration-200`}
                 />
               )}
             </div>
             {expandedWeeks[weekIndex] && (
-              <div className="mt-4">
+              <div className="mt-6 space-y-6">
                 {week.days.map((day, dayIndex) => (
                   <div
                     key={dayIndex}
-                    className={`border p-4 rounded-md mb-4 ${
-                      isDarkMode ? "border-stone-600" : "border-red-200"
-                    }`}
+                    className={`border p-6 rounded-lg ${
+                      isDarkMode
+                        ? "border-stone-600 bg-stone-700/50"
+                        : "border-red-200 bg-white/50"
+                    } transition-all duration-200`}
                   >
                     <h3
-                      className={`text-xl font-semibold mb-2 ${
+                      className={`text-xl font-semibold mb-4 ${
                         isDarkMode ? "text-red-400" : "text-red-800"
-                      }`}
+                      } tracking-tight`}
                     >
-                      {day.day} ({getDayDate(weekIndex, dayIndex)})
+                      {day.day}{" "}
+                      <span className="text-sm font-normal">
+                        ({getDayDate(weekIndex, dayIndex)})
+                      </span>
                     </h3>
-                    <div className="mb-4">
+                    <div className="mb-6">
                       <h4
-                        className={`text-base font-semibold mb-2 ${
+                        className={`text-lg font-semibold mb-3 ${
                           isDarkMode ? "text-red-400" : "text-red-800"
-                        }`}
+                        } tracking-wide`}
                       >
-                        Macro Goals:
+                        Macro Goals
                       </h4>
-                      <div className="flex flex-col sm:flex-row sm:space-x-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                          <p>Protein: {day.macros.protein}g</p>
+                          <label
+                            className={`block text-sm font-medium mb-1 ${
+                              isDarkMode ? "text-red-400" : "text-red-800"
+                            }`}
+                          >
+                            Protein (g)
+                          </label>
+                          <p
+                            className={`text-sm ${
+                              isDarkMode ? "text-stone-400" : "text-stone-600"
+                            }`}
+                          >
+                            {day.macros.protein}g
+                          </p>
                         </div>
                         <div>
-                          <p>Carbs: {day.macros.carbs}g</p>
+                          <label
+                            className={`block text-sm font-medium mb-1 ${
+                              isDarkMode ? "text-red-400" : "text-red-800"
+                            }`}
+                          >
+                            Carbs (g)
+                          </label>
+                          <p
+                            className={`text-sm ${
+                              isDarkMode ? "text-stone-400" : "text-stone-600"
+                            }`}
+                          >
+                            {day.macros.carbs}g
+                          </p>
                         </div>
                         <div>
-                          <p>Fats: {day.macros.fats}g</p>
+                          <label
+                            className={`block text-sm font-medium mb-1 ${
+                              isDarkMode ? "text-red-400" : "text-red-800"
+                            }`}
+                          >
+                            Fats (g)
+                          </label>
+                          <p
+                            className={`text-sm ${
+                              isDarkMode ? "text-stone-400" : "text-stone-600"
+                            }`}
+                          >
+                            {day.macros.fats}g
+                          </p>
                         </div>
                       </div>
                     </div>
-                    <div className="mb-4">
-                      <h4
-                        className={`text-base font-semibold mb-2 ${
-                          isDarkMode ? "text-red-400" : "text-red-800"
-                        }`}
-                      >
-                        Planned Meals:
-                      </h4>
-                      {day.meals.length > 0 ? (
-                        <ul className="list-disc pl-5">
-                          {day.meals.map((meal, mealIndex) => (
-                            <li key={mealIndex}>
-                              {meal.name}: {meal.grams}g ({meal.mealTime})
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p
-                          className={`text-sm italic ${
-                            isDarkMode ? "text-red-400" : "text-red-800"
-                          }`}
-                        >
-                          No meals planned.
-                        </p>
-                      )}
-                    </div>
                     <div>
                       <h4
-                        className={`text-base font-semibold mb-2 ${
+                        className={`text-lg font-semibold mb-3 ${
                           isDarkMode ? "text-red-400" : "text-red-800"
-                        }`}
+                        } tracking-wide`}
                       >
-                        Logged Meals:
+                        Logged Meals
                       </h4>
                       {Object.keys(day.loggedMeals).every(
                         (mealTime) => day.loggedMeals[mealTime].length === 0
@@ -229,20 +239,33 @@ const NutritionPlanView = () => {
                         </p>
                       ) : (
                         mealTimes.map((mealTime) => (
-                          <div key={mealTime} className="mb-4">
+                          <div key={mealTime} className="mb-6">
                             <h5
-                              className={`text-lg font-semibold mb-2 ${
+                              className={`text-base font-semibold mb-2 ${
                                 isDarkMode ? "text-red-400" : "text-red-800"
-                              }`}
+                              } tracking-wide border-b ${
+                                isDarkMode
+                                  ? "border-stone-600"
+                                  : "border-red-200"
+                              } pb-1`}
                             >
                               {mealTime}
                             </h5>
                             {day.loggedMeals[mealTime].length > 0 ? (
-                              <ul className="list-disc pl-5 mb-4">
+                              <ul className="space-y-2">
                                 {day.loggedMeals[mealTime].map(
                                   (meal, index) => (
-                                    <li key={index}>
-                                      {meal.name}: {meal.grams}g
+                                    <li
+                                      key={index}
+                                      className={`flex items-center justify-between p-2 rounded-lg ${
+                                        isDarkMode
+                                          ? "bg-stone-600/30"
+                                          : "bg-red-100/30"
+                                      } transition-all duration-200 hover:bg-opacity-50`}
+                                    >
+                                      <span className="text-sm">
+                                        {meal.name}: {meal.grams}g
+                                      </span>
                                     </li>
                                   )
                                 )}
@@ -259,13 +282,15 @@ const NutritionPlanView = () => {
                           </div>
                         ))
                       )}
-                      <div>
+                      <div className="mt-6">
                         <h5
-                          className={`text-sm font-semibold mb-2 ${
+                          className={`text-base font-semibold mb-3 ${
                             isDarkMode ? "text-red-400" : "text-red-800"
-                          }`}
+                          } tracking-wide border-b ${
+                            isDarkMode ? "border-stone-600" : "border-red-200"
+                          } pb-1`}
                         >
-                          Total Macros:
+                          Total Macros
                         </h5>
                         {(() => {
                           const loggedMacros = calculateLoggedMacros(
@@ -276,51 +301,94 @@ const NutritionPlanView = () => {
                             day.macros
                           );
                           return (
-                            <div className="flex flex-col sm:flex-row sm:space-x-4">
-                              <div>
-                                <p>
-                                  Protein: {loggedMacros.protein.toFixed(1)}g /{" "}
-                                  {day.macros.protein}g
-                                  <span
-                                    className={`ml-2 ${
+                            <div className="space-y-3">
+                              <div className="flex items-center space-x-3">
+                                <span className="w-24 font-medium">
+                                  Protein:
+                                </span>
+                                <div className="flex-1 bg-stone-200 dark:bg-stone-600 rounded-full h-4 overflow-hidden">
+                                  <div
+                                    className={`h-full ${
                                       goalsMet.protein
-                                        ? "text-green-500"
-                                        : "text-red-500"
+                                        ? "bg-green-500"
+                                        : "bg-red-500"
                                     }`}
-                                  >
-                                    {goalsMet.protein ? "✓" : "✗"}
-                                  </span>
-                                </p>
+                                    style={{
+                                      width: `${Math.min(
+                                        (loggedMacros.protein /
+                                          day.macros.protein) *
+                                          100,
+                                        100
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-sm">
+                                  {loggedMacros.protein.toFixed(1)}g /{" "}
+                                  {day.macros.protein}g
+                                </span>
+                                {goalsMet.protein ? (
+                                  <CheckCircle className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <XCircle className="w-5 h-5 text-red-500" />
+                                )}
                               </div>
-                              <div>
-                                <p>
-                                  Carbs: {loggedMacros.carbs.toFixed(1)}g /{" "}
-                                  {day.macros.carbs}g
-                                  <span
-                                    className={`ml-2 ${
+                              <div className="flex items-center space-x-3">
+                                <span className="w-24 font-medium">Carbs:</span>
+                                <div className="flex-1 bg-stone-200 dark:bg-stone-600 rounded-full h-4 overflow-hidden">
+                                  <div
+                                    className={`h-full ${
                                       goalsMet.carbs
-                                        ? "text-green-500"
-                                        : "text-red-500"
+                                        ? "bg-green-500"
+                                        : "bg-red-500"
                                     }`}
-                                  >
-                                    {goalsMet.carbs ? "✓" : "✗"}
-                                  </span>
-                                </p>
+                                    style={{
+                                      width: `${Math.min(
+                                        (loggedMacros.carbs /
+                                          day.macros.carbs) *
+                                          100,
+                                        100
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-sm">
+                                  {loggedMacros.carbs.toFixed(1)}g /{" "}
+                                  {day.macros.carbs}g
+                                </span>
+                                {goalsMet.carbs ? (
+                                  <CheckCircle className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <XCircle className="w-5 h-5 text-red-500" />
+                                )}
                               </div>
-                              <div>
-                                <p>
-                                  Fats: {loggedMacros.fats.toFixed(1)}g /{" "}
-                                  {day.macros.fats}g
-                                  <span
-                                    className={`ml-2 ${
+                              <div className="flex items-center space-x-3">
+                                <span className="w-24 font-medium">Fats:</span>
+                                <div className="flex-1 bg-stone-200 dark:bg-stone-600 rounded-full h-4 overflow-hidden">
+                                  <div
+                                    className={`h-full ${
                                       goalsMet.fats
-                                        ? "text-green-500"
-                                        : "text-red-500"
+                                        ? "bg-green-500"
+                                        : "bg-red-500"
                                     }`}
-                                  >
-                                    {goalsMet.fats ? "✓" : "✗"}
-                                  </span>
-                                </p>
+                                    style={{
+                                      width: `${Math.min(
+                                        (loggedMacros.fats / day.macros.fats) *
+                                          100,
+                                        100
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-sm">
+                                  {loggedMacros.fats.toFixed(1)}g /{" "}
+                                  {day.macros.fats}g
+                                </span>
+                                {goalsMet.fats ? (
+                                  <CheckCircle className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <XCircle className="w-5 h-5 text-red-500" />
+                                )}
                               </div>
                             </div>
                           );

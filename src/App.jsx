@@ -28,6 +28,8 @@ import NutritionPlanView from "./pages/NutritionPlanView";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile"; // Add this
+import ProtectedRoute from "./components/ProtectedRoute"; // Add this
 import "./styles/global.css";
 
 export const ThemeContext = createContext();
@@ -100,14 +102,15 @@ function App() {
                       path="fitness-tracker/history"
                       element={<FitnessHistory />}
                     />
-                    <Route path="nutrition" element={<Nutrition />} />{" "}
-                    {/* Moved to top-level */}
+                    <Route path="nutrition" element={<Nutrition />} />
                     <Route
                       path="nutrition-plan/:id"
                       element={<NutritionPlanView />}
-                    />{" "}
-                    {/* Adjusted */}
+                    />
                     <Route path="login" element={<Login />} />
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="profile" element={<Profile />} />
+                    </Route>
                     <Route path="*" element={<div>404 - Page Not Found</div>} />
                   </Route>
                 </Routes>

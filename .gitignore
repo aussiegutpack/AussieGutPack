@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 .env
+.env.github
+.env.local
+.env.vercel 
 
 # Editor directories and files
 .vscode/*

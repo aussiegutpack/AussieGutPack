@@ -7,6 +7,7 @@ import Background from "../components/layout/Background";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
+import { supabase } from "../supabaseClient";
 
 function Home() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -162,6 +163,7 @@ function Home() {
 
     fetchAndUpdateContent();
   }, []);
+  console.log("Supabase client initialized:", supabase);
 
   // Excerpt function to handle blocks
   const getExcerpt = (post) => {
@@ -314,18 +316,7 @@ function Home() {
               </p>
               <div className="flex justify-center gap-4 mt-6">
                 <Button
-                  to="/fitness-tips"
-                  variant="primary"
-                  className={`${
-                    isDarkMode
-                      ? "bg-red-800 text-white hover:bg-red-900"
-                      : "bg-red-800 text-white hover:bg-red-900"
-                  }`}
-                >
-                  Learn More
-                </Button>
-                <Button
-                  to="/signup"
+                  to="/login"
                   variant="primary"
                   className={`${
                     isDarkMode
@@ -575,10 +566,10 @@ function Home() {
             isDarkMode ? "text-white" : "text-red-600"
           }`}
         >
-          Want more? Check out our full library of fitness tips!
+          Want more? Sign up with us today!
         </p>
         <Button
-          to="/fitness-tips"
+          to="/login"
           variant="primary"
           className={`${
             isDarkMode
@@ -586,7 +577,7 @@ function Home() {
               : "bg-red-800 text-white hover:bg-red-900"
           }`}
         >
-          Explore Now
+          Sign Up
         </Button>
       </div>
     </div>
