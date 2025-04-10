@@ -28,6 +28,7 @@ import NutritionPlanView from "./pages/NutritionPlanView";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Profile from "./pages/Profile"; // Add this
 import ProtectedRoute from "./components/ProtectedRoute"; // Add this
 import "./styles/global.css";
@@ -108,6 +109,7 @@ function App() {
                       element={<NutritionPlanView />}
                     />
                     <Route path="login" element={<Login />} />
+                    <Route path="signup" element={<Signup />} />
                     <Route element={<ProtectedRoute />}>
                       <Route path="profile" element={<Profile />} />
                     </Route>
