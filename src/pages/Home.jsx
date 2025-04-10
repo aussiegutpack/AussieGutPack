@@ -283,7 +283,7 @@ function Home() {
               isDarkMode ? "text-red-400" : "text-red-800"
             }`}
           >
-            Welcome to Aussie Gut Pack
+            Welcome to Aussie Gut Pack (THIS IS VERCEL)
           </h1>
           <p
             className={`text-2xl max-w-2xl mx-auto mb-8 transition-colors duration-300 ease-in-out ${
