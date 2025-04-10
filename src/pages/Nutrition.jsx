@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { ThemeContext } from "../App";
 import { AuthContext } from "../context/AuthContext";
+import { ClipLoader } from "react-spinners";
 import {
   ChevronDown,
   ChevronUp,
