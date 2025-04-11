@@ -1,12 +1,18 @@
 /* Transition for the mobile menu */
 .mobile-menu-closed {
-  display: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+    visibility 0s linear 0.3s;
 }
 
 .mobile-menu-open {
-  display: block;
+  visibility: visible;
+  opacity: 1;
   transform: translateX(0);
-  transition: transform 0.3s ease-out;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+    visibility 0s linear;
 }
 
 /* Link hover transition */
@@ -14,19 +20,48 @@
   transition: background-color 0.3s ease, transform 0.2s ease-in-out;
 }
 
-.nav-link:hover {
-  transform: scale(1.05);
+/* Smooth hover for nav links on desktop */
+@media (min-width: 1024px) {
+  .nav-link:hover {
+    background-color: #2b6f2f; /* Darker green on hover */
+    transform: scale(1.05);
+  }
 }
 
-/* Smooth hover for nav links */
-.nav-link:hover {
-  background-color: #2b6f2f; /* Darker green on hover */
-}
-
-/* Menu animation for mobile */
-@media (max-width: 1024px) {
+/* Menu animation and link styles for mobile */
+@media (max-width: 1023px) {
   .mobile-menu-closed {
+    visibility: hidden;
+    opacity: 0;
     transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+      visibility 0s linear 0.3s;
+  }
+
+  .mobile-menu-open {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+      visibility 0s linear;
+  }
+
+  /* Adjust nav link styles for mobile */
+  .nav-link {
+    /* Remove transform on mobile to avoid awkward scaling on touch */
+    transition: background-color 0.3s ease;
+  }
+
+  .nav-link:hover {
+    background-color: #2b6f2f; /* Keep the background color change */
+    transform: none; /* Disable scale transform on mobile */
+  }
+}
+
+@media (max-width: 1023px) {
+  .mobile-menu-open {
+    width: 100%; /* Ensure the menu takes full width on small screens */
+    max-width: 300px; /* Optional: Limit the max width for better readability */
+    padding: 1rem; /* Add padding for better spacing */
   }
 }

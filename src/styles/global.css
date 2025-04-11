@@ -71,13 +71,43 @@
 /* Navigation */
 /* Transition for the mobile menu */
 .mobile-menu-closed {
-  display: none;
+  display: none; /* Completely remove from layout */
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+    visibility 0s linear 0.3s;
 }
 
 .mobile-menu-open {
-  display: block;
+  display: flex; /* Restore layout when open */
+  visibility: visible;
+  opacity: 1;
   transform: translateX(0);
-  transition: transform 0.3s ease-out;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+    visibility 0s linear;
+}
+
+/* Mobile menu backdrop */
+.mobile-menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(
+    0,
+    0,
+    0,
+    1
+  ); /* Fully opaque black to hide background content */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  z-index: 40; /* Below the nav (z-50) but above content */
+}
+
+.mobile-menu-backdrop.active {
+  opacity: 1;
 }
 
 /* Link hover transition */
@@ -85,16 +115,53 @@
   transition: background-color 0.3s ease, transform 0.2s ease-in-out;
 }
 
-.nav-link:hover {
-  transform: scale(1.05);
-  background-color: #2b6f2f; /* Darker green on hover */
+/* Smooth hover for nav links on desktop */
+@media (min-width: 1024px) {
+  .nav-link:hover {
+    background-color: #2b6f2f; /* Darker green on hover */
+    transform: scale(1.05);
+  }
 }
 
-/* Menu animation for mobile */
-@media (max-width: 1024px) {
+/* Menu animation and link styles for mobile */
+@media (max-width: 1023px) {
   .mobile-menu-closed {
+    display: none; /* Completely remove from layout */
+    visibility: hidden;
+    opacity: 0;
     transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+      visibility 0s linear 0.3s;
+  }
+
+  .mobile-menu-open {
+    display: flex; /* Restore layout when open */
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+      visibility 0s linear;
+    width: 100%;
+    height: calc(100vh - 4rem); /* Full height minus navbar height */
+    position: fixed;
+    top: 4rem; /* Below the navbar (adjust based on navbar height) */
+    left: 0;
+    z-index: 50; /* Ensure menu is above backdrop */
+    flex-direction: column;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    padding: 1.5rem; /* Increase padding for better spacing */
+  }
+
+  /* Adjust nav link styles for mobile */
+  .nav-link {
+    /* Remove transform on mobile to avoid awkward scaling on touch */
+    transition: background-color 0.3s ease;
+    margin-bottom: 0.5rem; /* Add spacing between menu items */
+  }
+
+  .nav-link:hover {
+    background-color: #2b6f2f; /* Keep the background color change */
+    transform: none; /* Disable scale transform on mobile */
   }
 }
 
@@ -109,10 +176,29 @@ main {
   padding-top: 4rem; /* Adjust based on navbar height (e.g., 64px = 4rem) */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   main {
-    padding-top: 3.5rem; /* Reduce padding on smaller screens if navbar height adjusts */
+    padding-top: 3.5rem; /* Adjust if the navbar height is smaller on mobile */
   }
+}
+
+/* Add ID for Skip to Content link */
+main {
+  scroll-margin-top: 4rem; /* Ensure content isn't hidden under the sticky nav */
+}
+
+/* Focus styles for all interactive elements */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #dc2626; /* Red-600 focus ring */
+}
+
+/* Disable body scroll when mobile menu is open */
+body:has(.mobile-menu-open) {
+  overflow: hidden;
 }
 
 .prose {
@@ -219,4 +305,15 @@ main {
 /* Disable body scroll when sidebar is open */
 body:has(.mini-cart-sidebar.translate-x-0) {
   overflow: hidden;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
