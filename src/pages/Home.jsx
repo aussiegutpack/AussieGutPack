@@ -1,6 +1,6 @@
 // src/pages/Home.jsx
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ThemeContext } from "../App";
 import Button from "../components/ui/Button";
 import Background from "../components/layout/Background";
@@ -8,11 +8,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 import { supabase } from "../supabaseClient";
+import { Helmet } from "react-helmet-async";
 
 function Home() {
   const { isDarkMode } = useContext(ThemeContext);
   const headerRef = useRef(null);
   const roofRef = useRef(null);
+  const location = useLocation(); // To get the current URL
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [isRoofVisible, setIsRoofVisible] = useState(false);
@@ -268,330 +270,373 @@ function Home() {
       completedChallenges.includes(index)
     );
 
+  // Construct the full URL dynamically
+  const baseUrl = "https://aussiegutpack.com";
+  const currentUrl = `${baseUrl}${
+    location.pathname === "/" ? "" : location.pathname
+  }`;
+
   return (
-    <main
-      id="main-content"
-      className={`min-h-screen flex flex-col ${
-        isDarkMode ? "bg-stone-900" : "bg-white"
-      }`}
-    >
-      <section
-        ref={headerRef}
-        className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
+    <>
+      <Helmet>
+        <title>Aussie Gut Pack - Empowering Digestive Health Naturally</title>
+        <meta
+          name="description"
+          content="Join Aussie Gut Pack to improve your gut health and overall wellness with natural tips, workouts, and challenges inspired by Australian Shepherds."
+        />
+        <meta
+          name="keywords"
+          content="gut health, digestive health, Australian Shepherd, wellness, fitness, daily challenges, Aussie Gut Pack"
+        />
+        <meta name="robots" content="index, follow" />
+        <meta
+          property="og:title"
+          content="Aussie Gut Pack - Empowering Digestive Health Naturally"
+        />
+        <meta
+          property="og:description"
+          content="Join Aussie Gut Pack to improve your gut health and overall wellness with natural tips, workouts, and challenges inspired by Australian Shepherds."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={currentUrl} />
+        <meta property="og:image" content={`${baseUrl}/images/og-image.jpg`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Aussie Gut Pack - Empowering Digestive Health Naturally"
+        />
+        <meta
+          name="twitter:description"
+          content="Join Aussie Gut Pack to improve your gut health and overall wellness with natural tips, workouts, and challenges inspired by Australian Shepherds."
+        />
+        <meta name="twitter:image" content={`${baseUrl}/images/og-image.jpg`} />
+      </Helmet>
+      <main
+        id="main-content"
+        className={`min-h-screen flex flex-col ${
+          isDarkMode ? "bg-stone-900" : "bg-white"
+        }`}
       >
-        <div className="container mx-auto text-center">
-          <header>
-            <h1
-              className={`text-5xl md:text-6xl font-extrabold mb-4 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-red-400" : "text-red-800"
+        <section
+          ref={headerRef}
+          className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
+        >
+          <div className="container mx-auto text-center">
+            <header>
+              <h1
+                className={`text-5xl md:text-6xl font-extrabold mb-4 transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-red-400" : "text-red-800"
+                }`}
+              >
+                Welcome to Aussie Gut Pack
+              </h1>
+              <p
+                className={`text-2xl max-w-2xl mx-auto mb-8 transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-white" : "text-red-600"
+                }`}
+              >
+                Empowering Your Digestive Health, Naturally.
+              </p>
+            </header>
+            <div
+              className={`flex flex-col md:flex-row gap-6 transition-all duration-700 ease-in-out ${
+                isHeaderVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
               }`}
             >
-              Welcome to Aussie Gut Pack
-            </h1>
-            <p
-              className={`text-2xl max-w-2xl mx-auto mb-8 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-white" : "text-red-600"
-              }`}
-            >
-              Empowering Your Digestive Health, Naturally.
-            </p>
-          </header>
+              <div className="md:w-1/2 p-6 flex flex-col justify-center">
+                <h2
+                  className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  }`}
+                >
+                  About Us
+                </h2>
+                <p
+                  className={`text-lg transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  {content.aboutUs}
+                </p>
+                <div className="flex justify-center gap-4 mt-6">
+                  <Button
+                    to="/login"
+                    variant="primary"
+                    className={`join-the-pack-button`}
+                    aria-label="Join the Aussie Gut Pack community"
+                  >
+                    Join the Pack
+                  </Button>
+                </div>
+              </div>
+              <div className="md:w-1/2 flex justify-center items-center">
+                <div className="h-80 w-80 md:h-[400px] md:w-[400px] overflow-hidden relative rounded-full">
+                  <Background className="w-full h-full object-cover" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <hr
+          className={`my-12 ${
+            isDarkMode ? "border-stone-700" : "border-stone-300"
+          }`}
+        />
+
+        <section
+          ref={roofRef}
+          className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
+        >
           <div
-            className={`flex flex-col md:flex-row gap-6 transition-all duration-700 ease-in-out ${
-              isHeaderVisible
+            className={`container mx-auto text-center transition-all duration-700 ease-in-out ${
+              isRoofVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="md:w-1/2 p-6 flex flex-col justify-center">
+            <h2
+              className={`text-3xl font-bold mb-8 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-red-400" : "text-red-800"
+              }`}
+            >
+              Wisdom to Win The Day
+            </h2>
+            <div className="max-w-2xl mx-auto mb-8">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={currentQuoteIndex}
+                  variants={quoteVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className={`text-xl italic transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  "{content.quotes[currentQuoteIndex]}"
+                </motion.p>
+              </AnimatePresence>
+            </div>
+
+            {/* Two-column layout for Workout and Challenges */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* Workout of the Day */}
+              <section aria-labelledby="workout-heading">
+                <h3
+                  id="workout-heading"
+                  className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  }`}
+                >
+                  Workout of the Day
+                </h3>
+                <p
+                  className={`text-lg mb-6 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  {content.currentWorkout.description}
+                </p>
+                <h4
+                  className={`text-xl font-semibold mb-3 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  }`}
+                >
+                  Warm Up
+                </h4>
+                <ul
+                  className={`text-left list-disc pl-6 mb-6 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-blue-300" : "text-blue-600"
+                  }`}
+                >
+                  {(content.currentWorkout.warmup || []).map(
+                    (exercise, index) => (
+                      <li key={`warmup-${index}`} className="mb-2 text-lg">
+                        {exercise}
+                      </li>
+                    )
+                  )}
+                </ul>
+                <h4
+                  className={`text-xl font-semibold mb-3 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  }`}
+                >
+                  Main Workout
+                </h4>
+                <ul
+                  className={`text-left list-disc pl-6 mb-8 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  {(content.currentWorkout.main || []).map(
+                    (exercise, index) => (
+                      <li key={`main-${index}`} className="mb-2 text-lg">
+                        {exercise}
+                      </li>
+                    )
+                  )}
+                </ul>
+                <Button
+                  to="/fitness-tips"
+                  variant="primary"
+                  className={`mx-auto ${
+                    isDarkMode
+                      ? "bg-red-800 text-white hover:bg-red-900"
+                      : "bg-red-800 text-white hover:bg-red-900"
+                  }`}
+                  aria-label="View more fitness tips"
+                >
+                  More Fitness Tips
+                </Button>
+              </section>
+
+              {/* Daily Gut Health Challenges */}
+              <section aria-labelledby="challenges-heading">
+                <h3
+                  id="challenges-heading"
+                  className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-red-400" : "text-red-800"
+                  }`}
+                >
+                  Daily Gut Health Challenges
+                </h3>
+                <ul
+                  className={`text-left list-disc pl-6 mb-4 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  {(content.dailyChallenges || []).map((challenge, index) => (
+                    <li
+                      key={`challenge-${index}`}
+                      className="mb-2 text-lg flex items-center"
+                    >
+                      <input
+                        type="checkbox"
+                        id={`challenge-${index}`}
+                        checked={completedChallenges.includes(index)}
+                        onChange={() => toggleChallenge(index)}
+                        className="mr-2"
+                        aria-label={`Mark challenge as completed: ${challenge}`}
+                      />
+                      <label htmlFor={`challenge-${index}`}>{challenge}</label>
+                    </li>
+                  ))}
+                </ul>
+                <AnimatePresence>
+                  {allChallengesCompleted && (
+                    <motion.p
+                      variants={messageVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className={`text-lg font-semibold transition-colors duration-300 ease-in-out ${
+                        isDarkMode ? "text-green-400" : "text-green-600"
+                      }`}
+                      aria-live="polite"
+                    >
+                      Great job, Pack Leader!
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <hr
+          className={`my-12 ${
+            isDarkMode ? "border-stone-700" : "border-stone-300"
+          }`}
+        />
+
+        {latestBlogPost && (
+          <section
+            className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
+          >
+            <div className="container mx-auto text-center">
               <h2
                 className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
                   isDarkMode ? "text-red-400" : "text-red-800"
                 }`}
               >
-                About Us
+                Latest From Our Blog
               </h2>
-              <p
-                className={`text-lg transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                {content.aboutUs}
-              </p>
-              <div className="flex justify-center gap-4 mt-6">
-                <Button
-                  to="/login"
-                  variant="primary"
-                  className={`join-the-pack-button`}
-                  aria-label="Join the Aussie Gut Pack community"
+              <article>
+                <h3
+                  className={`text-xl font-semibold mb-2 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
                 >
-                  Join the Pack
+                  {latestBlogPost.title}
+                </h3>
+                <p
+                  className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  {latestBlogPost.date}
+                </p>
+                <p
+                  className={`text-lg mb-6 max-w-2xl mx-auto transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  {latestBlogPost.excerpt}
+                </p>
+                <Button
+                  to={`/blog/${latestBlogPost.id}`}
+                  variant="primary"
+                  className={`mx-auto ${
+                    isDarkMode
+                      ? "bg-red-800 text-white hover:bg-red-900"
+                      : "bg-red-800 text-white hover:bg-red-900"
+                  }`}
+                  aria-label={`Read more about ${latestBlogPost.title}`}
+                >
+                  Read More
                 </Button>
-              </div>
+              </article>
             </div>
-            <div className="md:w-1/2 flex justify-center items-center">
-              <div className="h-80 w-80 md:h-[400px] md:w-[400px] overflow-hidden relative rounded-full">
-                <Background className="w-full h-full object-cover" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        )}
 
-      <hr
-        className={`my-12 ${
-          isDarkMode ? "border-stone-700" : "border-stone-300"
-        }`}
-      />
-
-      <section
-        ref={roofRef}
-        className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
-      >
-        <div
-          className={`container mx-auto text-center transition-all duration-700 ease-in-out ${
-            isRoofVisible
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-10"
+        <hr
+          className={`my-12 ${
+            isDarkMode ? "border-stone-700" : "border-stone-300"
           }`}
+        />
+
+        <section
+          className={`py-8 ${
+            isDarkMode ? "bg-stone-800" : "bg-stone-100"
+          } text-center`}
         >
-          <h2
-            className={`text-3xl font-bold mb-8 transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-red-400" : "text-red-800"
+          <p
+            className={`text-lg mb-4 ${
+              isDarkMode ? "text-white" : "text-red-600"
             }`}
           >
-            Wisdom to Win The Day
-          </h2>
-          <div className="max-w-2xl mx-auto mb-8">
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={currentQuoteIndex}
-                variants={quoteVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className={`text-xl italic transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                "{content.quotes[currentQuoteIndex]}"
-              </motion.p>
-            </AnimatePresence>
-          </div>
-
-          {/* Two-column layout for Workout and Challenges */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Workout of the Day */}
-            <section aria-labelledby="workout-heading">
-              <h3
-                id="workout-heading"
-                className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-red-400" : "text-red-800"
-                }`}
-              >
-                Workout of the Day
-              </h3>
-              <p
-                className={`text-lg mb-6 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                {content.currentWorkout.description}
-              </p>
-              <h4
-                className={`text-xl font-semibold mb-3 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-red-400" : "text-red-800"
-                }`}
-              >
-                Warm Up
-              </h4>
-              <ul
-                className={`text-left list-disc pl-6 mb-6 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-blue-300" : "text-blue-600"
-                }`}
-              >
-                {(content.currentWorkout.warmup || []).map(
-                  (exercise, index) => (
-                    <li key={`warmup-${index}`} className="mb-2 text-lg">
-                      {exercise}
-                    </li>
-                  )
-                )}
-              </ul>
-              <h4
-                className={`text-xl font-semibold mb-3 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-red-400" : "text-red-800"
-                }`}
-              >
-                Main Workout
-              </h4>
-              <ul
-                className={`text-left list-disc pl-6 mb-8 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                {(content.currentWorkout.main || []).map((exercise, index) => (
-                  <li key={`main-${index}`} className="mb-2 text-lg">
-                    {exercise}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                to="/fitness-tips"
-                variant="primary"
-                className={`mx-auto ${
-                  isDarkMode
-                    ? "bg-red-800 text-white hover:bg-red-900"
-                    : "bg-red-800 text-white hover:bg-red-900"
-                }`}
-                aria-label="View more fitness tips"
-              >
-                More Fitness Tips
-              </Button>
-            </section>
-
-            {/* Daily Gut Health Challenges */}
-            <section aria-labelledby="challenges-heading">
-              <h3
-                id="challenges-heading"
-                className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-red-400" : "text-red-800"
-                }`}
-              >
-                Daily Gut Health Challenges
-              </h3>
-              <ul
-                className={`text-left list-disc pl-6 mb-4 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                {(content.dailyChallenges || []).map((challenge, index) => (
-                  <li
-                    key={`challenge-${index}`}
-                    className="mb-2 text-lg flex items-center"
-                  >
-                    <input
-                      type="checkbox"
-                      id={`challenge-${index}`}
-                      checked={completedChallenges.includes(index)}
-                      onChange={() => toggleChallenge(index)}
-                      className="mr-2"
-                      aria-label={`Mark challenge as completed: ${challenge}`}
-                    />
-                    <label htmlFor={`challenge-${index}`}>{challenge}</label>
-                  </li>
-                ))}
-              </ul>
-              <AnimatePresence>
-                {allChallengesCompleted && (
-                  <motion.p
-                    variants={messageVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className={`text-lg font-semibold transition-colors duration-300 ease-in-out ${
-                      isDarkMode ? "text-green-400" : "text-green-600"
-                    }`}
-                    aria-live="polite"
-                  >
-                    Great job, Pack Leader!
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </section>
-          </div>
-        </div>
-      </section>
-
-      <hr
-        className={`my-12 ${
-          isDarkMode ? "border-stone-700" : "border-stone-300"
-        }`}
-      />
-
-      {latestBlogPost && (
-        <section
-          className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
-        >
-          <div className="container mx-auto text-center">
-            <h2
-              className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-red-400" : "text-red-800"
-              }`}
-            >
-              Latest From Our Blog
-            </h2>
-            <article>
-              <h3
-                className={`text-xl font-semibold mb-2 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                {latestBlogPost.title}
-              </h3>
-              <p
-                className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
-                {latestBlogPost.date}
-              </p>
-              <p
-                className={`text-lg mb-6 max-w-2xl mx-auto transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                {latestBlogPost.excerpt}
-              </p>
-              <Button
-                to={`/blog/${latestBlogPost.id}`}
-                variant="primary"
-                className={`mx-auto ${
-                  isDarkMode
-                    ? "bg-red-800 text-white hover:bg-red-900"
-                    : "bg-red-800 text-white hover:bg-red-900"
-                }`}
-                aria-label={`Read more about ${latestBlogPost.title}`}
-              >
-                Read More
-              </Button>
-            </article>
-          </div>
+            Want more? Sign up with us today!
+          </p>
+          <Button
+            to="/login"
+            variant="primary"
+            className={`${
+              isDarkMode
+                ? "bg-red-800 text-white hover:bg-red-900"
+                : "bg-red-800 text-white hover:bg-red-900"
+            }`}
+            aria-label="Sign up for Aussie Gut Pack"
+          >
+            Sign Up
+          </Button>
         </section>
-      )}
-
-      <hr
-        className={`my-12 ${
-          isDarkMode ? "border-stone-700" : "border-stone-300"
-        }`}
-      />
-
-      <section
-        className={`py-8 ${
-          isDarkMode ? "bg-stone-800" : "bg-stone-100"
-        } text-center`}
-      >
-        <p
-          className={`text-lg mb-4 ${
-            isDarkMode ? "text-white" : "text-red-600"
-          }`}
-        >
-          Want more? Sign up with us today!
-        </p>
-        <Button
-          to="/login"
-          variant="primary"
-          className={`${
-            isDarkMode
-              ? "bg-red-800 text-white hover:bg-red-900"
-              : "bg-red-800 text-white hover:bg-red-900"
-          }`}
-          aria-label="Sign up for Aussie Gut Pack"
-        >
-          Sign Up
-        </Button>
-      </section>
-    </main>
+      </main>
+    </>
   );
 }
 
