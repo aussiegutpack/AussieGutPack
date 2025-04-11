@@ -1,11 +1,14 @@
-// src/components/layout/Background.jsx
+// src/components/layout/Background.jsx (with cycling)
 import React, { useState, useEffect } from "react";
 import aussie from "../../assets/images/aussie.png";
 import goggins from "../../assets/images/goggins.png";
 
-const images = [aussie, goggins];
+const images = [
+  { src: aussie, alt: "Australian Shepherd dog" },
+  { src: goggins, alt: "David Goggins running" },
+];
 
-const Background = () => {
+const Background = ({ className }) => {
   const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
@@ -18,12 +21,13 @@ const Background = () => {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden bg-gray-900">
       {images.map((image, index) => (
-        <div
+        <img
           key={index}
-          className={`absolute inset-0 w-[120%] h-full bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
+          src={image.src}
+          alt={image.alt}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
             index === currentImage ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ backgroundImage: `url(${image})` }}
+          } ${className || ""}`}
         />
       ))}
     </div>

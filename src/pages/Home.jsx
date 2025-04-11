@@ -55,7 +55,7 @@ function Home() {
         },
         scheduledWorkouts: [],
         aboutUs:
-          "We are dedicated to bringing you information about Australian Shepherds and how to maintain a healthy gut. Our mission is to educate and inspire a natural approach to wellness for you and your furry friends.",
+          "because your dog is demanding breakfast, but because you actually feel good. We’re obsessed with gut health, movement, and all the little things that keep your body running like a well-oiled machine (or at least a decently maintained bicycle). Because let’s be real—when your digestion is on point and your energy isn’t tanking by noon, life is just better. So whether you’re here for the health tips, Aussie Shepherd appreciation, or just to figure out why you’re tired again, welcome to the party. Let’s make wellness feel less like a chore and more like an adventure.",
         dailyChallenges: [
           "Drink 8 glasses of water.",
           "Take a 10-minute digestion-boosting walk with your Aussie.",
@@ -163,6 +163,7 @@ function Home() {
 
     fetchAndUpdateContent();
   }, []);
+
   console.log("Supabase client initialized:", supabase);
 
   // Excerpt function to handle blocks
@@ -268,7 +269,8 @@ function Home() {
     );
 
   return (
-    <div
+    <main
+      id="main-content"
       className={`min-h-screen flex flex-col ${
         isDarkMode ? "bg-stone-900" : "bg-white"
       }`}
@@ -278,20 +280,22 @@ function Home() {
         className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
       >
         <div className="container mx-auto text-center">
-          <h1
-            className={`text-5xl md:text-6xl font-extrabold mb-4 transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-red-400" : "text-red-800"
-            }`}
-          >
-            Welcome to Aussie Gut Pack
-          </h1>
-          <p
-            className={`text-2xl max-w-2xl mx-auto mb-8 transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-white" : "text-red-600"
-            }`}
-          >
-            Empowering Your Digestive Health, Naturally.
-          </p>
+          <header>
+            <h1
+              className={`text-5xl md:text-6xl font-extrabold mb-4 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-red-400" : "text-red-800"
+              }`}
+            >
+              Welcome to Aussie Gut Pack
+            </h1>
+            <p
+              className={`text-2xl max-w-2xl mx-auto mb-8 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-white" : "text-red-600"
+              }`}
+            >
+              Empowering Your Digestive Health, Naturally.
+            </p>
+          </header>
           <div
             className={`flex flex-col md:flex-row gap-6 transition-all duration-700 ease-in-out ${
               isHeaderVisible
@@ -318,11 +322,8 @@ function Home() {
                 <Button
                   to="/login"
                   variant="primary"
-                  className={`${
-                    isDarkMode
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "bg-red-700 text-white hover:bg-red-800"
-                  }`}
+                  className={`join-the-pack-button`}
+                  aria-label="Join the Aussie Gut Pack community"
                 >
                   Join the Pack
                 </Button>
@@ -381,8 +382,9 @@ function Home() {
           {/* Two-column layout for Workout and Challenges */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Workout of the Day */}
-            <div>
+            <section aria-labelledby="workout-heading">
               <h3
+                id="workout-heading"
                 className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
                   isDarkMode ? "text-red-400" : "text-red-800"
                 }`}
@@ -442,14 +444,16 @@ function Home() {
                     ? "bg-red-800 text-white hover:bg-red-900"
                     : "bg-red-800 text-white hover:bg-red-900"
                 }`}
+                aria-label="View more fitness tips"
               >
                 More Fitness Tips
               </Button>
-            </div>
+            </section>
 
             {/* Daily Gut Health Challenges */}
-            <div>
+            <section aria-labelledby="challenges-heading">
               <h3
+                id="challenges-heading"
                 className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
                   isDarkMode ? "text-red-400" : "text-red-800"
                 }`}
@@ -468,11 +472,13 @@ function Home() {
                   >
                     <input
                       type="checkbox"
+                      id={`challenge-${index}`}
                       checked={completedChallenges.includes(index)}
                       onChange={() => toggleChallenge(index)}
                       className="mr-2"
+                      aria-label={`Mark challenge as completed: ${challenge}`}
                     />
-                    {challenge}
+                    <label htmlFor={`challenge-${index}`}>{challenge}</label>
                   </li>
                 ))}
               </ul>
@@ -486,12 +492,13 @@ function Home() {
                     className={`text-lg font-semibold transition-colors duration-300 ease-in-out ${
                       isDarkMode ? "text-green-400" : "text-green-600"
                     }`}
+                    aria-live="polite"
                   >
                     Great job, Pack Leader!
                   </motion.p>
                 )}
               </AnimatePresence>
-            </div>
+            </section>
           </div>
         </div>
       </section>
@@ -514,38 +521,41 @@ function Home() {
             >
               Latest From Our Blog
             </h2>
-            <h3
-              className={`text-xl font-semibold mb-2 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-white" : "text-red-600"
-              }`}
-            >
-              {latestBlogPost.title}
-            </h3>
-            <p
-              className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {latestBlogPost.date}
-            </p>
-            <p
-              className={`text-lg mb-6 max-w-2xl mx-auto transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-white" : "text-red-600"
-              }`}
-            >
-              {latestBlogPost.excerpt}
-            </p>
-            <Button
-              to={`/blog/${latestBlogPost.id}`}
-              variant="primary"
-              className={`mx-auto ${
-                isDarkMode
-                  ? "bg-red-800 text-white hover:bg-red-900"
-                  : "bg-red-800 text-white hover:bg-red-900"
-              }`}
-            >
-              Read More
-            </Button>
+            <article>
+              <h3
+                className={`text-xl font-semibold mb-2 transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-white" : "text-red-600"
+                }`}
+              >
+                {latestBlogPost.title}
+              </h3>
+              <p
+                className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                {latestBlogPost.date}
+              </p>
+              <p
+                className={`text-lg mb-6 max-w-2xl mx-auto transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-white" : "text-red-600"
+                }`}
+              >
+                {latestBlogPost.excerpt}
+              </p>
+              <Button
+                to={`/blog/${latestBlogPost.id}`}
+                variant="primary"
+                className={`mx-auto ${
+                  isDarkMode
+                    ? "bg-red-800 text-white hover:bg-red-900"
+                    : "bg-red-800 text-white hover:bg-red-900"
+                }`}
+                aria-label={`Read more about ${latestBlogPost.title}`}
+              >
+                Read More
+              </Button>
+            </article>
           </div>
         </section>
       )}
@@ -556,7 +566,7 @@ function Home() {
         }`}
       />
 
-      <div
+      <section
         className={`py-8 ${
           isDarkMode ? "bg-stone-800" : "bg-stone-100"
         } text-center`}
@@ -576,11 +586,12 @@ function Home() {
               ? "bg-red-800 text-white hover:bg-red-900"
               : "bg-red-800 text-white hover:bg-red-900"
           }`}
+          aria-label="Sign up for Aussie Gut Pack"
         >
           Sign Up
         </Button>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
 
