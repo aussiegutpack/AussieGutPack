@@ -310,6 +310,33 @@ function Home() {
           content="Join Aussie Gut Pack to improve your gut health and overall wellness with natural tips, workouts, and challenges inspired by Australian Shepherds."
         />
         <meta name="twitter:image" content={`${baseUrl}/images/og-image.jpg`} />
+        {latestBlogPost && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              headline: latestBlogPost.title,
+              datePublished: latestBlogPost.date,
+              description: latestBlogPost.excerpt,
+              author: {
+                "@type": "Organization",
+                name: "Aussie Gut Pack",
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "Aussie Gut Pack",
+                logo: {
+                  "@type": "ImageObject",
+                  url: `${baseUrl}/images/creatine.png`, // We need to change this to a proper logo
+                },
+              },
+              mainEntityOfPage: {
+                "@type": "WebPage",
+                "@id": `${baseUrl}/blog/${latestBlogPost.id}`,
+              },
+            })}
+          </script>
+        )}
       </Helmet>
       <main
         id="main-content"
