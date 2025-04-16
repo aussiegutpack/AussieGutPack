@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeContext } from "../App";
@@ -28,6 +27,7 @@ function Home() {
   });
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [latestBlogPost, setLatestBlogPost] = useState(null);
+  const [upcomingBlogPost, setUpcomingBlogPost] = useState(null); // New state for upcoming blog
   const [completedChallenges, setCompletedChallenges] = useState(
     () => JSON.parse(localStorage.getItem("completedChallenges")) || []
   );
@@ -57,7 +57,7 @@ function Home() {
         },
         scheduledWorkouts: [],
         aboutUs:
-          "because your dog is demanding breakfast, but because you actually feel good. We’re obsessed with gut health, movement, and all the little things that keep your body running like a well-oiled machine (or at least a decently maintained bicycle). Because let’s be real—when your digestion is on point and your energy isn’t tanking by noon, life is just better. So whether you’re here for the health tips, Aussie Shepherd appreciation, or just to figure out why you’re tired again, welcome to the party. Let’s make wellness feel less like a chore and more like an adventure.",
+          "because your dog is demanding breakfast, but because you actually feel good. We’re obsessed with gut health, movement, and all the little things that keep your body running like a well-oiled machine (or at least a decently maintained bicycle). Because let’s be real—when your digestion is on point and your energy isn’t tanking by noon, life is just better. So whether you’re here for the health tips, Aussie Shepherd appreciation, or just to figure out out why you’re tired again, welcome to the party. Let’s make wellness feel less like a chore and more like an adventure.",
         dailyChallenges: [
           "Drink 8 glasses of water.",
           "Take a 10-minute digestion-boosting walk with your Aussie.",
@@ -127,10 +127,22 @@ function Home() {
         }));
 
         if (blogPosts.length > 0) {
+          // Sort for latest blog post (past or present)
           blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
           const latestPost = blogPosts[0];
           const excerpt = getExcerpt(latestPost);
           setLatestBlogPost({ ...latestPost, excerpt });
+
+          // Filter and sort for upcoming blog post (future date)
+          const currentDate = new Date("2025-04-16T00:00:00Z");
+          const upcomingPosts = blogPosts
+            .filter((post) => new Date(post.date) > currentDate)
+            .sort((a, b) => new Date(a.date) - new Date(b.date)); // Earliest first
+          if (upcomingPosts.length > 0) {
+            const upcomingPost = upcomingPosts[0];
+            const upcomingExcerpt = getExcerpt(upcomingPost);
+            setUpcomingBlogPost({ ...upcomingPost, excerpt: upcomingExcerpt });
+          }
         } else {
           // Fallback if no posts exist
           setLatestBlogPost({
@@ -431,7 +443,10 @@ function Home() {
             >
               Wisdom to Win The Day
             </h2>
-            <div className="max-w-2xl mx-auto mb-8">
+            <div
+              className="max-w-2xl mx-auto mb-8"
+              style={{ minHeight: "80px" }}
+            >
               <AnimatePresence mode="wait">
                 <motion.p
                   key={currentQuoteIndex}
@@ -442,6 +457,13 @@ function Home() {
                   className={`text-xl italic transition-colors duration-300 ease-in-out ${
                     isDarkMode ? "text-white" : "text-red-600"
                   }`}
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
                 >
                   "{content.quotes[currentQuoteIndex]}"
                 </motion.p>
@@ -596,19 +618,21 @@ function Home() {
           }`}
         />
 
-        {latestBlogPost && (
-          <section
-            className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
-          >
-            <div className="container mx-auto text-center">
-              <h2
-                className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-red-400" : "text-red-800"
-                }`}
-              >
-                Latest From Our Blog
-              </h2>
-              <article>
+        <section
+          className={`py-20 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
+        >
+          <div className="container mx-auto text-center">
+            <h2
+              className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-red-400" : "text-red-800"
+              }`}
+            >
+              Latest From Our Blog
+            </h2>
+
+            {/* Latest Blog Post */}
+            {latestBlogPost && (
+              <article className="mb-8">
                 <h3
                   className={`text-xl font-semibold mb-2 transition-colors duration-300 ease-in-out ${
                     isDarkMode ? "text-white" : "text-red-600"
@@ -643,9 +667,52 @@ function Home() {
                   Read More
                 </Button>
               </article>
-            </div>
-          </section>
-        )}
+            )}
+
+            {/* Upcoming Blog Post */}
+            {upcomingBlogPost ? (
+              <article>
+                <h3
+                  className={`text-xl font-semibold mb-2 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  Upcoming: {upcomingBlogPost.title}
+                </h3>
+                <p
+                  className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  Coming on{" "}
+                  {new Date(upcomingBlogPost.date).toLocaleDateString()}
+                </p>
+                <p
+                  className={`text-lg mb-6 max-w-2xl mx-auto transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-white" : "text-red-600"
+                  }`}
+                >
+                  {upcomingBlogPost.excerpt}
+                </p>
+                <p
+                  className={`text-sm italic transition-colors duration-300 ease-in-out ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  Stay tuned for this upcoming post!
+                </p>
+              </article>
+            ) : (
+              <p
+                className={`text-lg transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-white" : "text-red-600"
+                }`}
+              >
+                No upcoming blog posts at this time.
+              </p>
+            )}
+          </div>
+        </section>
 
         <hr
           className={`my-12 ${

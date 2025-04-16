@@ -32,6 +32,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Sitemap from "./pages/Sitemap";
 import "./styles/global.css";
 
 export const ThemeContext = createContext();
@@ -76,6 +77,7 @@ function App() {
                       <Route path="purchase" element={<Purchase />} />
                       <Route path="blog" element={<Blog />} />
                       <Route path="blog/:id" element={<BlogPost />} />
+                      <Route path="/sitemap.xml" element={<Sitemap />} />
                       <Route path="faq" element={<FAQ />} />
                       <Route path="contact" element={<Contact />} />
                       <Route path="admin" element={<AdminPage />} />

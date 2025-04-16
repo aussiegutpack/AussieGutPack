@@ -1,8 +1,7 @@
-// src/pages/BlogAdminPage.js
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
-import { db, auth } from "../firebase"; // Import auth
+import { db, auth } from "../firebase";
 import {
   collection,
   getDocs,
@@ -10,7 +9,7 @@ import {
   doc,
   deleteDoc,
 } from "firebase/firestore";
-import { onAuthStateChanged, signOut } from "firebase/auth"; // Import Firebase Auth methods
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 function BlogAdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -23,10 +22,10 @@ function BlogAdminPage() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigate("/admin"); // Redirect to /admin if not authenticated
+        navigate("/admin");
       }
     });
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, [navigate]);
 
   useEffect(() => {
@@ -38,18 +37,15 @@ function BlogAdminPage() {
           id: doc.id,
           title: doc.data().title || "",
           blocks: doc.data().blocks || [{ type: "paragraph", content: "" }],
+          date: doc.data().date || "", // Add date field
           lastEdited: doc.data().lastEdited || "",
         }));
 
-        // Sort blog posts by lastEdited (newest first)
+        // Sort blog posts by date (newest first)
         const sortedBlogData = blogData.sort((a, b) => {
-          const lastEditedA = a.lastEdited
-            ? new Date(a.lastEdited)
-            : new Date(0);
-          const lastEditedB = b.lastEdited
-            ? new Date(b.lastEdited)
-            : new Date(0);
-          return lastEditedB - lastEditedA; // Newest lastEdited first
+          const dateA = a.date ? new Date(a.date) : new Date(0);
+          const dateB = b.date ? new Date(b.date) : new Date(0);
+          return dateB - dateA; // Newest date first
         });
 
         setBlogPosts(
@@ -60,6 +56,7 @@ function BlogAdminPage() {
                   id: "",
                   title: "",
                   blocks: [{ type: "paragraph", content: "" }],
+                  date: new Date().toISOString().split("T")[0], // Default to today
                   lastEdited: "",
                 },
               ]
@@ -103,6 +100,7 @@ function BlogAdminPage() {
                   ? { url: block.content.url, text: block.content.text }
                   : block.content.filter((item) => item.trim() !== ""),
             })),
+            date: post.date || new Date().toISOString(), // Save date
             lastEdited: post.lastEdited || new Date().toISOString(),
           });
         }
@@ -118,7 +116,7 @@ function BlogAdminPage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/admin"); // Redirect to /admin after logout
+      navigate("/admin");
     } catch (err) {
       setError("Failed to log out: " + err.message);
     }
@@ -131,6 +129,7 @@ function BlogAdminPage() {
         id: "",
         title: "",
         blocks: [{ type: "paragraph", content: "" }],
+        date: new Date().toISOString().split("T")[0], // Default to today
         lastEdited: new Date().toISOString(),
       },
     ];
@@ -241,7 +240,14 @@ function BlogAdminPage() {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
-    }); // e.g., "4/3/2025, 10:15 AM"
+    });
+  };
+
+  // Format the publish date for display
+  const formatPublishDate = (dateString) => {
+    if (!dateString) return "Not set";
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
   };
 
   return (
@@ -301,6 +307,13 @@ function BlogAdminPage() {
                       isDarkMode ? "text-stone-400" : "text-stone-500"
                     }`}
                   >
+                    Publish Date: {formatPublishDate(post.date)}
+                  </p>
+                  <p
+                    className={`text-sm italic transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-400" : "text-stone-500"
+                    }`}
+                  >
                     Last Edited: {formatLastEdited(post.lastEdited)}
                   </p>
                 </div>
@@ -347,6 +360,27 @@ function BlogAdminPage() {
               }`}
               placeholder="Blog Title"
             />
+            <div className="mb-4">
+              <label
+                className={`block mb-1 transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-white" : "text-red-600"
+                }`}
+              >
+                Publish Date:
+              </label>
+              <input
+                type="date"
+                value={blogPosts[selectedPostIndex].date.split("T")[0] || ""}
+                onChange={(e) =>
+                  updateBlogPost(selectedPostIndex, "date", e.target.value)
+                }
+                className={`border p-2 w-full ${
+                  isDarkMode
+                    ? "bg-stone-700 border-stone-600 text-white"
+                    : "bg-white border-red-300 text-red-600"
+                }`}
+              />
+            </div>
             <p
               className={`text-sm italic mb-4 transition-colors duration-300 ease-in-out ${
                 isDarkMode ? "text-stone-400" : "text-stone-500"
@@ -563,7 +597,7 @@ function BlogAdminPage() {
                 </button>
                 <button
                   onClick={() => addBlock(selectedPostIndex, "image")}
-                  className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                  className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 easement-in-out"
                 >
                   Add Image
                 </button>
