@@ -318,3 +318,137 @@ body:has(.mini-cart-sidebar.translate-x-0) {
   border: 0;
 }
 
+/* Add focus styles for accessibility */
+a:focus,
+button:focus,
+input:focus {
+  outline: 2px solid #ff0000; /* Red outline for visibility (matches your theme) */
+  outline-offset: 2px;
+}
+
+/* Ensure focus styles are visible in dark mode */
+.dark a:focus,
+.dark button:focus,
+.dark input:focus {
+  outline: 2px solid #ff6666; /* Lighter red for dark mode */
+  outline-offset: 2px;
+}
+
+/* Remove default browser outline (optional, if you want custom styles only) */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Ensure focus is visible for keyboard users */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #ff0000;
+  outline-offset: 2px;
+}
+
+.dark a:focus-visible,
+.dark button:focus-visible,
+.dark input:focus-visible {
+  outline: 2px solid #ff6666;
+  outline-offset: 2px;
+}
+
+/* Container for Workout and Challenges sections */
+.workout-section,
+.challenges-section {
+  padding: 1.5rem; /* Increased padding for better spacing */
+  border-radius: 8px; /* Rounded corners for a softer look */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Hover effect for sections */
+.workout-section:hover,
+.challenges-section:hover {
+  transform: translateY(-4px); /* Slight lift on hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+}
+
+/* Light mode styles */
+.workout-section {
+  background-color: #ffe6e6; /* Softer red background */
+  border: 1px solid #fecaca; /* Subtle red border */
+}
+
+.challenges-section {
+  background-color: #ffe6e6;
+  border: 1px solid #fecaca;
+}
+
+/* Dark mode styles */
+.dark .workout-section,
+.dark .challenges-section {
+  background-color: #4a1a1a; /* Deep red background for dark mode */
+  border: 1px solid #7f1d1d; /* Darker red border */
+}
+
+/* Hover effect for list items */
+.workout-section ul li,
+.challenges-section ul li {
+  transition: background-color 0.2s ease-in-out;
+  margin-bottom: 0.25rem; /* Updated: Reduced vertical spacing between bullets from 0.5rem (8px) to 0.25rem (4px) */
+}
+
+.workout-section ul li:hover,
+.challenges-section ul li:hover {
+  background-color: rgba(255, 99, 99, 0.1); /* Light red tint on hover */
+}
+
+.dark .workout-section ul li:hover,
+.dark .challenges-section ul li:hover {
+  background-color: rgba(
+    255,
+    99,
+    99,
+    0.2
+  ); /* Slightly more pronounced in dark mode */
+}
+
+/* Checkbox styling for Challenges section */
+.challenges-section input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #ff0000; /* Red checkbox to match theme */
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+
+.challenges-section input[type="checkbox"]:hover {
+  transform: scale(1.1); /* Slight scale on hover */
+}
+
+/* Button hover effect (override existing hover) */
+.workout-section .btn-primary {
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.workout-section .btn-primary:hover {
+  background-color: #b91c1c !important; /* Slightly lighter red on hover */
+  transform: scale(1.05); /* Slight scale on hover */
+}
+
+.dark .workout-section .btn-primary:hover {
+  background-color: #dc2626 !important; /* Brighter red in dark mode */
+}
+
+/* Adjust spacing for headings and paragraphs */
+.workout-section h3,
+.challenges-section h3 {
+  margin-bottom: 1.5rem; /* More space below heading */
+}
+
+.workout-section p,
+.challenges-section ul {
+  margin-bottom: 2rem; /* More space below description and list */
+}
+
+.workout-section h4 {
+  margin-bottom: 1rem; /* Consistent spacing for subheadings */
+}

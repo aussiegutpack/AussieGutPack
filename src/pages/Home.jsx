@@ -451,7 +451,10 @@ function Home() {
             {/* Two-column layout for Workout and Challenges */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {/* Workout of the Day */}
-              <section aria-labelledby="workout-heading">
+              <section
+                className="workout-section"
+                aria-labelledby="workout-heading"
+              >
                 <h3
                   id="workout-heading"
                   className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
@@ -476,7 +479,7 @@ function Home() {
                 </h4>
                 <ul
                   className={`text-left list-disc pl-6 mb-6 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-blue-300" : "text-blue-600"
+                    isDarkMode ? "text-white-300" : "text-white-600"
                   }`}
                 >
                   {(content.currentWorkout.warmup || []).map(
@@ -510,7 +513,7 @@ function Home() {
                 <Button
                   to="/fitness-tips"
                   variant="primary"
-                  className={`mx-auto ${
+                  className={`mx-auto btn-primary ${
                     isDarkMode
                       ? "bg-red-800 text-white hover:bg-red-900"
                       : "bg-red-800 text-white hover:bg-red-900"
@@ -520,9 +523,11 @@ function Home() {
                   More Fitness Tips
                 </Button>
               </section>
-
               {/* Daily Gut Health Challenges */}
-              <section aria-labelledby="challenges-heading">
+              <section
+                className="challenges-section"
+                aria-labelledby="challenges-heading"
+              >
                 <h3
                   id="challenges-heading"
                   className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
@@ -535,6 +540,7 @@ function Home() {
                   className={`text-left list-disc pl-6 mb-4 transition-colors duration-300 ease-in-out ${
                     isDarkMode ? "text-white" : "text-red-600"
                   }`}
+                  role="list"
                 >
                   {(content.dailyChallenges || []).map((challenge, index) => (
                     <li
@@ -548,6 +554,7 @@ function Home() {
                         onChange={() => toggleChallenge(index)}
                         className="mr-2"
                         aria-label={`Mark challenge as completed: ${challenge}`}
+                        aria-checked={completedChallenges.includes(index)}
                       />
                       <label htmlFor={`challenge-${index}`}>{challenge}</label>
                     </li>
