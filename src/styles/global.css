@@ -75,8 +75,8 @@
   visibility: hidden;
   opacity: 0;
   transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
-    visibility 0s linear 0.3s;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease-in-out, visibility 0s linear 0.4s;
 }
 
 .mobile-menu-open {
@@ -84,43 +84,8 @@
   visibility: visible;
   opacity: 1;
   transform: translateX(0);
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
-    visibility 0s linear;
-}
-
-/* Mobile menu backdrop */
-.mobile-menu-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(
-    0,
-    0,
-    0,
-    1
-  ); /* Fully opaque black to hide background content */
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  z-index: 40; /* Below the nav (z-50) but above content */
-}
-
-.mobile-menu-backdrop.active {
-  opacity: 1;
-}
-
-/* Link hover transition */
-.nav-link {
-  transition: background-color 0.3s ease, transform 0.2s ease-in-out;
-}
-
-/* Smooth hover for nav links on desktop */
-@media (min-width: 1024px) {
-  .nav-link:hover {
-    background-color: #2b6f2f; /* Darker green on hover */
-    transform: scale(1.05);
-  }
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease-in-out, visibility 0s linear;
 }
 
 /* Menu animation and link styles for mobile */
@@ -130,8 +95,8 @@
     visibility: hidden;
     opacity: 0;
     transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
-      visibility 0s linear 0.3s;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.4s ease-in-out, visibility 0s linear 0.4s;
   }
 
   .mobile-menu-open {
@@ -139,17 +104,17 @@
     visibility: visible;
     opacity: 1;
     transform: translateX(0);
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
-      visibility 0s linear;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.4s ease-in-out, visibility 0s linear;
     width: 100%;
     height: calc(100vh - 4rem); /* Full height minus navbar height */
     position: fixed;
-    top: 4rem; /* Below the navbar (adjust based on navbar height) */
+    top: 4rem; /* Position below the navbar */
     left: 0;
-    z-index: 50; /* Ensure menu is above backdrop */
+    z-index: 40; /* Below the navbar (z-50) */
     flex-direction: column;
     overflow-y: auto; /* Allow scrolling if content overflows */
-    padding: 1.5rem; /* Increase padding for better spacing */
+    padding: 1.5rem; /* Consistent padding */
   }
 
   /* Adjust nav link styles for mobile */

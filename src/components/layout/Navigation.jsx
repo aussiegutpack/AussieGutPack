@@ -1,4 +1,3 @@
-// src/components/layout/Navigation.jsx
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
@@ -69,7 +68,7 @@ const Navigation = ({ location }) => {
         } transition-colors duration-300`}
         aria-label="Main navigation"
       >
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center relative z-50">
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold tracking-tight">
             Aussie Gut Pack
@@ -156,9 +155,9 @@ const Navigation = ({ location }) => {
             onClick={toggleMenu}
             aria-expanded={isMenuOpen}
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            className="lg:hidden p-2 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 focus:outline-none focus:ring-2 focus:ring-red-600 transition-colors duration-200"
+            className="lg:hidden p-2 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 focus:outline-none focus:ring-2 focus:ring-red-600 transition-colors duration-200 text-xl z-60"
           >
-            {isMenuOpen ? "✖" : "☰"}
+            <i className={isMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
           </button>
         </div>
 
