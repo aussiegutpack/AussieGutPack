@@ -1,9 +1,8 @@
-// src/pages/HomeAdminPage.js
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
-import { db, auth } from "../firebase"; // Import auth
-import { onAuthStateChanged, signOut } from "firebase/auth"; // Import Firebase Auth methods
+import { db, auth } from "../firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 function HomeAdminPage() {
@@ -11,7 +10,9 @@ function HomeAdminPage() {
   const [quotes, setQuotes] = useState([""]);
   const [workoutDesc, setWorkoutDesc] = useState("");
   const [warmupExercises, setWarmupExercises] = useState([""]);
-  const [mainExercises, setMainExercises] = useState([""]);
+  const [workoutSections, setWorkoutSections] = useState([
+    { title: "Main Workout", exercises: [""] }, // Default section
+  ]);
   const [scheduledWorkouts, setScheduledWorkouts] = useState([]);
   const [aboutUs, setAboutUs] = useState("");
   const [dailyChallenges, setDailyChallenges] = useState([""]);
@@ -22,10 +23,10 @@ function HomeAdminPage() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigate("/admin"); // Redirect to /admin if not authenticated
+        navigate("/admin");
       }
     });
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, [navigate]);
 
   useEffect(() => {
@@ -42,8 +43,11 @@ function HomeAdminPage() {
               ? data.currentWorkout.warmup
               : [""]
           );
-          setMainExercises(
-            data.currentWorkout?.main?.length ? data.currentWorkout.main : [""]
+          // Load dynamic workout sections
+          setWorkoutSections(
+            data.currentWorkout?.sections?.length
+              ? data.currentWorkout.sections
+              : [{ title: "Main Workout", exercises: [""] }]
           );
           setScheduledWorkouts(
             data.scheduledWorkouts?.length
@@ -80,7 +84,15 @@ function HomeAdminPage() {
       currentWorkout: {
         description: workoutDesc,
         warmup: warmupExercises.filter((exercise) => exercise.trim() !== ""),
-        main: mainExercises.filter((exercise) => exercise.trim() !== ""),
+        sections: workoutSections
+          .filter(
+            (section) =>
+              section.title.trim() && section.exercises.some((ex) => ex.trim())
+          )
+          .map((section) => ({
+            title: section.title,
+            exercises: section.exercises.filter((ex) => ex.trim() !== ""),
+          })),
       },
       scheduledWorkouts: scheduledWorkouts
         .filter(
@@ -114,7 +126,7 @@ function HomeAdminPage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/admin"); // Redirect to /admin after logout
+      navigate("/admin");
     } catch (err) {
       setError("Failed to log out: " + err.message);
     }
@@ -138,13 +150,31 @@ function HomeAdminPage() {
     setWarmupExercises(newExercises);
   };
 
-  const addMainExercise = () => setMainExercises([...mainExercises, ""]);
-  const removeMainExercise = (index) =>
-    setMainExercises(mainExercises.filter((_, i) => i !== index));
-  const updateMainExercise = (index, value) => {
-    const newExercises = [...mainExercises];
-    newExercises[index] = value;
-    setMainExercises(newExercises);
+  const addWorkoutSection = () =>
+    setWorkoutSections([...workoutSections, { title: "", exercises: [""] }]);
+  const removeWorkoutSection = (index) =>
+    setWorkoutSections(workoutSections.filter((_, i) => i !== index));
+  const updateWorkoutSectionTitle = (index, value) => {
+    const newSections = [...workoutSections];
+    newSections[index].title = value;
+    setWorkoutSections(newSections);
+  };
+  const addSectionExercise = (index) => {
+    const newSections = [...workoutSections];
+    newSections[index].exercises.push("");
+    setWorkoutSections(newSections);
+  };
+  const removeSectionExercise = (index, exerciseIndex) => {
+    const newSections = [...workoutSections];
+    newSections[index].exercises = newSections[index].exercises.filter(
+      (_, i) => i !== exerciseIndex
+    );
+    setWorkoutSections(newSections);
+  };
+  const updateSectionExercise = (index, exerciseIndex, value) => {
+    const newSections = [...workoutSections];
+    newSections[index].exercises[exerciseIndex] = value;
+    setWorkoutSections(newSections);
   };
 
   const addScheduledWorkout = () =>
@@ -340,40 +370,70 @@ function HomeAdminPage() {
           Add Warm Up Exercise
         </button>
 
-        <h4
-          className={`text-lg transition-colors duration-300 ease-in-out ${
-            isDarkMode ? "text-red-400" : "text-red-800"
-          } mt-4 mb-2`}
-        >
-          Main Workout Exercises
-        </h4>
-        {mainExercises.map((exercise, index) => (
-          <div key={`main-${index}`} className="flex mb-2">
-            <input
-              type="text"
-              value={exercise}
-              onChange={(e) => updateMainExercise(index, e.target.value)}
-              className={`border p-2 w-full mr-2 ${
-                isDarkMode
-                  ? "bg-stone-700 border-stone-600 text-white"
-                  : "bg-white border-red-300 text-red-600"
-              }`}
-              placeholder={`Main Exercise ${index + 1}`}
-            />
+        {workoutSections.map((section, index) => (
+          <div key={`section-${index}`} className="mt-4">
+            <div className="flex items-center mb-2">
+              <input
+                type="text"
+                value={section.title}
+                onChange={(e) =>
+                  updateWorkoutSectionTitle(index, e.target.value)
+                }
+                className={`border p-2 w-full mr-2 ${
+                  isDarkMode
+                    ? "bg-stone-700 border-stone-600 text-white"
+                    : "bg-white border-red-300 text-red-600"
+                }`}
+                placeholder="Section Title (e.g., Strength, Conditioning)"
+              />
+              <button
+                onClick={() => removeWorkoutSection(index)}
+                className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                disabled={workoutSections.length === 1}
+              >
+                Remove Section
+              </button>
+            </div>
+            {section.exercises.map((exercise, exIndex) => (
+              <div
+                key={`section-${index}-exercise-${exIndex}`}
+                className="flex mb-2"
+              >
+                <input
+                  type="text"
+                  value={exercise}
+                  onChange={(e) =>
+                    updateSectionExercise(index, exIndex, e.target.value)
+                  }
+                  className={`border p-2 w-full mr-2 ${
+                    isDarkMode
+                      ? "bg-stone-700 border-stone-600 text-white"
+                      : "bg-white border-red-300 text-red-600"
+                  }`}
+                  placeholder={`Exercise ${exIndex + 1}`}
+                />
+                <button
+                  onClick={() => removeSectionExercise(index, exIndex)}
+                  className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                  disabled={section.exercises.length === 1}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
             <button
-              onClick={() => removeMainExercise(index)}
-              className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-              disabled={mainExercises.length === 1}
+              onClick={() => addSectionExercise(index)}
+              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
             >
-              Remove
+              Add Exercise
             </button>
           </div>
         ))}
         <button
-          onClick={addMainExercise}
-          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
+          onClick={addWorkoutSection}
+          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-4"
         >
-          Add Main Exercise
+          Add Workout Section
         </button>
       </div>
 

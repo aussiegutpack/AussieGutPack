@@ -479,7 +479,7 @@ function Home() {
                 </h4>
                 <ul
                   className={`text-left list-disc pl-6 mb-6 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-white-300" : "text-white-600"
+                    isDarkMode ? "text-blue-300" : "text-blue-600"
                   }`}
                 >
                   {(content.currentWorkout.warmup || []).map(
@@ -490,26 +490,35 @@ function Home() {
                     )
                   )}
                 </ul>
-                <h4
-                  className={`text-xl font-semibold mb-3 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-red-400" : "text-red-800"
-                  }`}
-                >
-                  Main Workout
-                </h4>
-                <ul
-                  className={`text-left list-disc pl-6 mb-8 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-white" : "text-red-600"
-                  }`}
-                >
-                  {(content.currentWorkout.main || []).map(
-                    (exercise, index) => (
-                      <li key={`main-${index}`} className="mb-2 text-lg">
-                        {exercise}
-                      </li>
-                    )
-                  )}
-                </ul>
+
+                {(content.currentWorkout.sections || []).map(
+                  (section, index) => (
+                    <div key={`section-${index}`} className="mb-6">
+                      <h4
+                        className={`text-xl font-semibold mb-3 transition-colors duration-300 ease-in-out ${
+                          isDarkMode ? "text-red-400" : "text-red-800"
+                        }`}
+                      >
+                        {section.title || "Untitled Section"}
+                      </h4>
+                      <ul
+                        className={`text-left list-disc pl-6 mb-8 transition-colors duration-300 ease-in-out ${
+                          isDarkMode ? "text-white" : "text-red-600"
+                        }`}
+                      >
+                        {(section.exercises || []).map((exercise, exIndex) => (
+                          <li
+                            key={`section-${index}-exercise-${exIndex}`}
+                            className="mb-2 text-lg"
+                          >
+                            {exercise}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                )}
+
                 <Button
                   to="/fitness-tips"
                   variant="primary"
