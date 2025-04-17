@@ -1,4 +1,3 @@
-// src/components/ui/ProductCard.jsx
 import React from "react";
 import { useContext } from "react";
 import { ThemeContext } from "../../App";
@@ -27,10 +26,10 @@ const ProductCard = ({ product }) => {
               isDarkMode ? "text-stone-400" : "text-stone-500"
             }`}
           >
-            ${product.price}
+            ${product.price.toFixed(2)}
           </span>
           <Button
-            to={`/shop/product/${product.id}`} // Adjust routing as needed
+            to={`/shop/product/${product.id}`}
             variant="primary"
             className={`text-sm py-1 px-3 ${
               isDarkMode

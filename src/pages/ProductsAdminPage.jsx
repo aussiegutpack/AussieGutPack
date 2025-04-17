@@ -1,8 +1,7 @@
-// src/pages/admin/ProductsAdminPage.jsx
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
-import { db, storage, auth } from "../firebase"; // Import auth
+import { db, storage, auth } from "../firebase";
 import {
   collection,
   getDocs,
@@ -17,7 +16,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-import { onAuthStateChanged, signOut } from "firebase/auth"; // Import Firebase Auth methods
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 function ProductsAdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -29,23 +28,21 @@ function ProductsAdminPage() {
     name: "",
     price: "",
     description: "",
-    image: null, // Store the file object
-    color: "",
-    size: "",
+    image: null,
   });
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [error, setError] = useState(null); // Add error state for logout errors
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Check authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigate("/admin"); // Redirect to /admin if not authenticated
+        navigate("/admin");
       }
     });
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, [navigate]);
 
   // Fetch categories and products from Firestore
@@ -116,7 +113,6 @@ function ProductsAdminPage() {
         (prod) => prod.categoryId === categoryId
       );
       for (const prod of productsToDelete) {
-        // Delete the associated image from Storage
         if (prod.image && prod.image !== "https://via.placeholder.com/80") {
           const filePath = prod.image.split("/products%2F")[1].split("?")[0];
           const storageRef = ref(
@@ -129,7 +125,6 @@ function ProductsAdminPage() {
             );
           });
         }
-        // Delete the product from Firestore
         await deleteDoc(doc(db, "products", prod.id));
       }
       setProducts(products.filter((prod) => prod.categoryId !== categoryId));
@@ -147,10 +142,26 @@ function ProductsAdminPage() {
     return imageUrl;
   };
 
+  // Validate product fields
+  const validateProduct = (product) => {
+    if (!product.categoryId) return "Category is required.";
+    if (!product.name.trim()) return "Name is required.";
+    if (!product.description.trim()) return "Description is required.";
+    if (!product.price || isNaN(product.price) || Number(product.price) <= 0)
+      return "A valid price is required.";
+    if (!product.image) return "An image is required.";
+    return "";
+  };
+
   // Add a new product
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    if (!newProduct.categoryId || !newProduct.name || !newProduct.price) return;
+    const validationError = validateProduct(newProduct);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
       const imageUrl = await uploadImage(newProduct.image);
 
@@ -158,10 +169,8 @@ function ProductsAdminPage() {
         categoryId: newProduct.categoryId,
         name: newProduct.name,
         price: parseFloat(newProduct.price),
-        description: newProduct.description || "No description available",
+        description: newProduct.description,
         image: imageUrl || "https://via.placeholder.com/80",
-        color: newProduct.color || "N/A",
-        size: newProduct.size || "N/A",
       });
       setProducts([
         ...products,
@@ -170,10 +179,8 @@ function ProductsAdminPage() {
           categoryId: newProduct.categoryId,
           name: newProduct.name,
           price: parseFloat(newProduct.price),
-          description: newProduct.description || "No description available",
+          description: newProduct.description,
           image: imageUrl || "https://via.placeholder.com/80",
-          color: newProduct.color || "N/A",
-          size: newProduct.size || "N/A",
         },
       ]);
       setNewProduct({
@@ -182,9 +189,8 @@ function ProductsAdminPage() {
         price: "",
         description: "",
         image: null,
-        color: "",
-        size: "",
       });
+      setError(null);
     } catch (error) {
       setError("Error adding product: " + error.message);
       alert(
@@ -195,6 +201,12 @@ function ProductsAdminPage() {
 
   // Edit a product
   const handleEditProduct = async (product) => {
+    const validationError = validateProduct(product);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
       const imageUrl =
         product.image instanceof File
@@ -208,8 +220,6 @@ function ProductsAdminPage() {
         price: parseFloat(product.price),
         description: product.description,
         image: imageUrl || "https://via.placeholder.com/80",
-        color: product.color,
-        size: product.size,
       });
       setProducts(
         products.map((prod) =>
@@ -221,13 +231,12 @@ function ProductsAdminPage() {
                 price: parseFloat(product.price),
                 description: product.description,
                 image: imageUrl || "https://via.placeholder.com/80",
-                color: product.color,
-                size: product.size,
               }
             : prod
         )
       );
       setEditingProduct(null);
+      setError(null);
     } catch (error) {
       setError("Error updating product: " + error.message);
       alert(
@@ -239,10 +248,8 @@ function ProductsAdminPage() {
   // Delete a product
   const handleDeleteProduct = async (productId) => {
     try {
-      // Find the product to get its image URL
       const product = products.find((prod) => prod.id === productId);
       if (product.image && product.image !== "https://via.placeholder.com/80") {
-        // Extract the file path from the image URL
         const filePath = product.image.split("/products%2F")[1].split("?")[0];
         const storageRef = ref(
           storage,
@@ -255,9 +262,9 @@ function ProductsAdminPage() {
         });
       }
 
-      // Delete the product from Firestore
       await deleteDoc(doc(db, "products", productId));
       setProducts(products.filter((prod) => prod.id !== productId));
+      setError(null);
     } catch (error) {
       setError("Error deleting product: " + error.message);
     }
@@ -267,7 +274,7 @@ function ProductsAdminPage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/admin"); // Redirect to /admin after logout
+      navigate("/admin");
     } catch (error) {
       setError("Failed to log out: " + error.message);
     }
@@ -429,7 +436,6 @@ function ProductsAdminPage() {
               onChange={(e) =>
                 setNewProduct({ ...newProduct, categoryId: e.target.value })
               }
-              required
               className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                 isDarkMode
                   ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
@@ -458,7 +464,6 @@ function ProductsAdminPage() {
               onChange={(e) =>
                 setNewProduct({ ...newProduct, name: e.target.value })
               }
-              required
               className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                 isDarkMode
                   ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
@@ -482,7 +487,6 @@ function ProductsAdminPage() {
               onChange={(e) =>
                 setNewProduct({ ...newProduct, price: e.target.value })
               }
-              required
               className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                 isDarkMode
                   ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
@@ -534,50 +538,6 @@ function ProductsAdminPage() {
               }`}
             />
           </div>
-          <div>
-            <label
-              className={`block text-sm font-medium mb-2 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-white" : "text-red-600"
-              }`}
-            >
-              Color
-            </label>
-            <input
-              type="text"
-              value={newProduct.color}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, color: e.target.value })
-              }
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
-                isDarkMode
-                  ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
-                  : "bg-white border-red-300 text-red-600 focus:ring-red-500"
-              }`}
-              placeholder="Color (optional)"
-            />
-          </div>
-          <div>
-            <label
-              className={`block text-sm font-medium mb-2 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-white" : "text-red-600"
-              }`}
-            >
-              Size
-            </label>
-            <input
-              type="text"
-              value={newProduct.size}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, size: e.target.value })
-              }
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
-                isDarkMode
-                  ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
-                  : "bg-white border-red-300 text-red-600 focus:ring-red-500"
-              }`}
-              placeholder="Size (optional)"
-            />
-          </div>
           <button
             type="submit"
             className="bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 transition-colors duration-300 ease-in-out w-full"
@@ -624,7 +584,6 @@ function ProductsAdminPage() {
                           categoryId: e.target.value,
                         })
                       }
-                      required
                       className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                         isDarkMode
                           ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
@@ -656,7 +615,6 @@ function ProductsAdminPage() {
                           name: e.target.value,
                         })
                       }
-                      required
                       className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                         isDarkMode
                           ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
@@ -682,7 +640,6 @@ function ProductsAdminPage() {
                           price: e.target.value,
                         })
                       }
-                      required
                       className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
                         isDarkMode
                           ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
@@ -745,54 +702,6 @@ function ProductsAdminPage() {
                           className="w-32 h-32 object-cover mt-2 rounded-md"
                         />
                       )}
-                  </div>
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-white" : "text-red-600"
-                      }`}
-                    >
-                      Color
-                    </label>
-                    <input
-                      type="text"
-                      value={editingProduct.color}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          color: e.target.value,
-                        })
-                      }
-                      className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
-                        isDarkMode
-                          ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
-                          : "bg-white border-red-300 text-red-600 focus:ring-red-500"
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-white" : "text-red-600"
-                      }`}
-                    >
-                      Size
-                    </label>
-                    <input
-                      type="text"
-                      value={editingProduct.size}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          size: e.target.value,
-                        })
-                      }
-                      className={`w-full px-4 py-2 border rounded-md focus:outline-none ${
-                        isDarkMode
-                          ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500"
-                          : "bg-white border-red-300 text-red-600 focus:ring-red-500"
-                      }`}
-                    />
                   </div>
                   <div className="flex gap-4">
                     <button

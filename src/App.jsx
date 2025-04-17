@@ -6,6 +6,7 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import Products from "./pages/shop/Products";
+import ProductDetail from "./pages/shop/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/shop/Checkout";
 import GutHealth from "./pages/content/GutHealth";
@@ -86,6 +87,10 @@ function App() {
                       <Route
                         path="admin/products"
                         element={<ProductsAdminPage />}
+                      />
+                      <Route
+                        path="/shop/product/:id"
+                        element={<ProductDetail />}
                       />
                       <Route
                         path="fitness-tracker"

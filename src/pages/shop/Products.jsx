@@ -1,11 +1,10 @@
-// src/pages/shop/Products.jsx
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { ThemeContext } from "../../App";
 import { useCart } from "../../context/CartContext";
 import { db } from "../../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { TransitionGroup, CSSTransition } from "react-transition-group"; // For cart item removal animation
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 function Products() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -16,24 +15,22 @@ function Products() {
   const [showAll, setShowAll] = useState(false);
   const [sortOption, setSortOption] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // New state for search
   const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
-  const [loading, setLoading] = useState(true); // For loading state
+  const [loading, setLoading] = useState(true);
   const [openedByAdd, setOpenedByAdd] = useState(false);
   const timerRef = useRef(null);
-  const lastAddToCartClick = useRef(null); // Added to track last Add to Cart click
+  const lastAddToCartClick = useRef(null);
   const navigate = useNavigate();
 
-  // Log when isMiniCartOpen changes
   useEffect(() => {
     console.log("isMiniCartOpen updated to:", isMiniCartOpen);
   }, [isMiniCartOpen]);
 
-  // Log when show's state changes
   useEffect(() => {
     console.log("showAll updated to:", showAll);
   }, [showAll]);
 
-  // Close sidebar on outside click
   useEffect(() => {
     const handleOutsideClick = (e) => {
       const cartButton = document.querySelector(".cart-button");
@@ -52,7 +49,7 @@ function Products() {
         !e.target.closest(".mini-cart-sidebar") &&
         !cartButton?.contains(e.target) &&
         !addToCartButton &&
-        timeSinceLastAdd > 100 && // Ignore clicks within 100ms of an Add to Cart click
+        timeSinceLastAdd > 100 &&
         !openedByAdd
       ) {
         console.log("Outside click detected, closing sidebar");
@@ -63,7 +60,6 @@ function Products() {
     return () => document.removeEventListener("click", handleOutsideClick);
   }, [isMiniCartOpen, openedByAdd]);
 
-  // Fetch data from Firestore with loading state
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -91,10 +87,8 @@ function Products() {
     fetchData();
   }, []);
 
-  // Auto-open/close sidebar when cart updates
   useEffect(() => {
     if (cart.length > 0) {
-      // Clear any existing timer
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
@@ -117,7 +111,6 @@ function Products() {
     };
   }, [cart]);
 
-  // Close sidebar when cart becomes empty
   useEffect(() => {
     if (cart.length === 0 && isMiniCartOpen) {
       console.log("Cart is empty, closing sidebar");
@@ -126,9 +119,8 @@ function Products() {
     }
   }, [cart, isMiniCartOpen]);
 
-  // Handle adding to cart
   const handleAddToCart = (product) => {
-    lastAddToCartClick.current = Date.now(); // Set timestamp for last Add to Cart click
+    lastAddToCartClick.current = Date.now();
     addToCart(product);
   };
 
@@ -148,9 +140,19 @@ function Products() {
     }
   };
 
+  // Apply search, category filter, and sorting
+  const searchedProducts = products.filter((product) =>
+    searchTerm
+      ? product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      : true
+  );
+
   const filteredProducts = filterCategory
-    ? products.filter((product) => product.categoryId === filterCategory)
-    : products;
+    ? searchedProducts.filter(
+        (product) => product.categoryId === filterCategory
+      )
+    : searchedProducts;
 
   const displayedProducts = sortProducts(filteredProducts);
 
@@ -206,6 +208,21 @@ function Products() {
               </span>
             )}
           </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <input
+            type="text"
+            placeholder="Search products by name or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full px-4 py-2 border rounded-md focus:outline-none transition-all duration-300 ease-in-out ${
+              isDarkMode
+                ? "bg-stone-700 border-stone-600 text-white placeholder-stone-400 focus:ring-red-500 focus:border-red-500"
+                : "bg-white border-red-300 text-red-600 placeholder-stone-400 focus:ring-red-500 focus:border-red-500"
+            }`}
+          />
         </div>
 
         {/* Sorting, Filtering, and View Options */}
@@ -269,7 +286,7 @@ function Products() {
                 console.log("Setting showAll to:", newShowAll);
                 if (newShowAll) {
                   console.log("Resetting filterCategory to show all products");
-                  setFilterCategory(""); // Reset filter when showing all products
+                  setFilterCategory("");
                 }
                 return newShowAll;
               });
@@ -323,7 +340,8 @@ function Products() {
                       alt={product.name}
                       className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
                       onError={(e) => {
-                        e.target.src = "https://via.placeholder.com/80";
+                        e.target.src =
+                          "https://via.placeholder.com/300x200.png?text=No+Image";
                         console.error(
                           `Failed to load image for ${product.name}`
                         );
@@ -344,36 +362,32 @@ function Products() {
                       {product.description}
                     </p>
                     <p
-                      className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
+                      className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
                         isDarkMode ? "text-stone-300" : "text-stone-600"
                       }`}
                     >
                       Price: ${product.price.toFixed(2)}
                     </p>
-                    <p
-                      className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      Color: {product.color}
-                    </p>
-                    <p
-                      className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      Size: {product.size}
-                    </p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        lastAddToCartClick.current = Date.now();
-                        handleAddToCart(product);
-                      }}
-                      className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out w-full"
-                    >
-                      Add to Cart
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          lastAddToCartClick.current = Date.now();
+                          handleAddToCart(product);
+                        }}
+                        className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1"
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={() => navigate(`/shop/product/${product.id}`)}
+                        className={`bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 ${
+                          isDarkMode ? "bg-gray-500" : "bg-gray-600"
+                        }`}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -395,7 +409,8 @@ function Products() {
                   alt={product.name}
                   className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
                   onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/80";
+                    e.target.src =
+                      "https://via.placeholder.com/300x200.png?text=No+Image";
                     console.error(`Failed to load image for ${product.name}`);
                   }}
                 />
@@ -414,36 +429,32 @@ function Products() {
                   {product.description}
                 </p>
                 <p
-                  className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
+                  className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
                     isDarkMode ? "text-stone-300" : "text-stone-600"
                   }`}
                 >
                   Price: ${product.price.toFixed(2)}
                 </p>
-                <p
-                  className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-stone-300" : "text-stone-600"
-                  }`}
-                >
-                  Color: {product.color}
-                </p>
-                <p
-                  className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-stone-300" : "text-stone-600"
-                  }`}
-                >
-                  Size: {product.size}
-                </p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    lastAddToCartClick.current = Date.now();
-                    handleAddToCart(product);
-                  }}
-                  className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out w-full"
-                >
-                  Add to Cart
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      lastAddToCartClick.current = Date.now();
+                      handleAddToCart(product);
+                    }}
+                    className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1"
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    onClick={() => navigate(`/shop/product/${product.id}`)}
+                    className={`bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 ${
+                      isDarkMode ? "bg-gray-500" : "bg-gray-600"
+                    }`}
+                  >
+                    View Details
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -476,7 +487,8 @@ function Products() {
                       alt={product.name}
                       className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
                       onError={(e) => {
-                        e.target.src = "https://via.placeholder.com/80";
+                        e.target.src =
+                          "https://via.placeholder.com/300x200.png?text=No+Image";
                         console.error(
                           `Failed to load image for ${product.name}`
                         );
@@ -497,36 +509,32 @@ function Products() {
                       {product.description}
                     </p>
                     <p
-                      className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
+                      className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
                         isDarkMode ? "text-stone-300" : "text-stone-600"
                       }`}
                     >
                       Price: ${product.price.toFixed(2)}
                     </p>
-                    <p
-                      className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      Color: {product.color}
-                    </p>
-                    <p
-                      className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      Size: {product.size}
-                    </p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        lastAddToCartClick.current = Date.now();
-                        handleAddToCart(product);
-                      }}
-                      className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out w-full"
-                    >
-                      Add to Cart
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          lastAddToCartClick.current = Date.now();
+                          handleAddToCart(product);
+                        }}
+                        className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1"
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={() => navigate(`/shop/product/${product.id}`)}
+                        className={`bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 ${
+                          isDarkMode ? "bg-gray-500" : "bg-gray-600"
+                        }`}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -540,7 +548,7 @@ function Products() {
         <>
           {/* Backdrop */}
           <div
-            className={`mini-cart-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 active`} // Added active class
+            className={`mini-cart-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 active`}
             onClick={(e) => {
               e.stopPropagation();
               console.log("Backdrop clicked, closing sidebar");
@@ -611,7 +619,8 @@ function Products() {
                             alt={item.name}
                             className="w-16 h-16 object-cover rounded-md"
                             onError={(e) => {
-                              e.target.src = "https://via.placeholder.com/80";
+                              e.target.src =
+                                "https://via.placeholder.com/300x200.png?text=No+Image";
                             }}
                           />
                           <div className="flex-1">
