@@ -15,10 +15,11 @@ function Products() {
   const [showAll, setShowAll] = useState(false);
   const [sortOption, setSortOption] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
-  const [searchTerm, setSearchTerm] = useState(""); // New state for search
+  const [searchTerm, setSearchTerm] = useState("");
   const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [openedByAdd, setOpenedByAdd] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // For mobile filter toggle
   const timerRef = useRef(null);
   const lastAddToCartClick = useRef(null);
   const navigate = useNavigate();
@@ -140,7 +141,6 @@ function Products() {
     }
   };
 
-  // Apply search, category filter, and sorting
   const searchedProducts = products.filter((product) =>
     searchTerm
       ? product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,22 +158,22 @@ function Products() {
 
   return (
     <div
-      className={`min-h-screen container mx-auto px-6 py-12 flex ${
+      className={`min-h-screen container mx-auto px-4 py-8 md:px-6 md:py-12 ${
         isDarkMode ? "bg-stone-900" : "bg-stone-50"
       }`}
     >
-      {/* Main Content */}
-      <div className="flex-1">
-        <div className="flex justify-between items-center mb-8">
-          <h1
-            className={`text-4xl font-bold transition-colors duration-300 ease-in-out ${
-              isDarkMode ? "text-red-400" : "text-red-800"
-            }`}
-          >
-            Products
-          </h1>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1
+          className={`text-3xl md:text-4xl font-bold transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
+          }`}
+        >
+          Gut Pack
+        </h1>
+        <div className="flex items-center space-x-4">
           <button
-            className="cart-button relative flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-all duration-300 ease-in-out bg-red-800 text-white hover:bg-red-900 active:bg-red-950"
+            className="cart-button relative flex items-center gap-2 px-3 py-2 rounded-md font-semibold transition-all duration-300 ease-in-out bg-red-800 text-white hover:bg-red-900 active:bg-red-950 md:px-4"
             onClick={(e) => {
               e.stopPropagation();
               console.log(
@@ -185,7 +185,7 @@ function Products() {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:scale-110"
+              className="h-5 w-5 md:h-6 md:w-6 transition-transform duration-300 ease-in-out group-hover:scale-110"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -197,10 +197,10 @@ function Products() {
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            <span>Cart</span>
+            <span className="hidden md:inline">Cart</span>
             {Array.isArray(cart) && cart.length > 0 && (
               <span
-                className={`absolute -top-2 -right-2 bg-yellow-500 text-black rounded-full h-6 w-6 flex items-center justify-center text-sm transition-all duration-300 ease-in-out ${
+                className={`absolute -top-2 -right-2 bg-yellow-500 text-black rounded-full h-5 w-5 md:h-6 md:w-6 flex items-center justify-center text-xs md:text-sm transition-all duration-300 ease-in-out ${
                   cart.length > 0 ? "animate-bounce" : ""
                 }`}
               >
@@ -208,10 +208,42 @@ function Products() {
               </span>
             )}
           </button>
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="md:hidden text-white focus:outline-none"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16m-7 6h7"
+              />
+            </svg>
+          </button>
         </div>
+      </div>
 
-        {/* Search Bar */}
-        <div className="mb-8">
+      {/* Filters Section (Collapsible on Mobile) */}
+      <div
+        className={`${
+          isFilterOpen ? "block" : "hidden"
+        } md:block mb-6 transition-all duration-300 ease-in-out`}
+      >
+        <h2
+          className={`text-2xl md:text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
+            isDarkMode ? "text-red-400" : "text-red-800"
+          }`}
+        >
+          Products
+        </h2>
+        <div className="mb-6">
           <input
             type="text"
             placeholder="Search products by name or description..."
@@ -224,13 +256,11 @@ function Products() {
             }`}
           />
         </div>
-
-        {/* Sorting, Filtering, and View Options */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <label
-                className={`text-lg font-medium transition-colors duration-300 ease-in-out ${
+                className={`text-base md:text-lg font-medium transition-colors duration-300 ease-in-out ${
                   isDarkMode ? "text-white" : "text-red-600"
                 }`}
               >
@@ -239,7 +269,7 @@ function Products() {
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className={`px-4 py-2 border rounded-md focus:outline-none transition-all duration-300 ease-in-out ${
+                className={`w-full sm:w-auto px-4 py-2 border rounded-md focus:outline-none transition-all duration-300 ease-in-out ${
                   isDarkMode
                     ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500 focus:border-red-500"
                     : "bg-white border-red-300 text-red-600 focus:ring-red-500 focus:border-red-500"
@@ -253,9 +283,9 @@ function Products() {
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <label
-                className={`text-lg font-medium transition-colors duration-300 ease-in-out ${
+                className={`text-base md:text-lg font-medium transition-colors duration-300 ease-in-out ${
                   isDarkMode ? "text-white" : "text-red-600"
                 }`}
               >
@@ -264,7 +294,7 @@ function Products() {
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
-                className={`px-4 py-2 border rounded-md focus:outline-none transition-all duration-300 ease-in-out ${
+                className={`w-full sm:w-auto px-4 py-2 border rounded-md focus:outline-none transition-all duration-300 ease-in-out ${
                   isDarkMode
                     ? "bg-stone-700 border-stone-600 text-white focus:ring-red-500 focus:border-red-500"
                     : "bg-white border-red-300 text-red-600 focus:ring-red-500 focus:border-red-500"
@@ -291,7 +321,7 @@ function Products() {
                 return newShowAll;
               });
             }}
-            className={`px-4 py-2 rounded-md font-semibold transition-all duration-300 ease-in-out ${
+            className={`w-full sm:w-auto px-4 py-2 rounded-md font-semibold transition-all duration-300 ease-in-out ${
               isDarkMode
                 ? "bg-red-600 text-white hover:bg-red-700 active:bg-red-800"
                 : "bg-red-800 text-white hover:bg-red-900 active:bg-red-950"
@@ -300,253 +330,243 @@ function Products() {
             {showAll ? "Group by Category" : "Show All Products"}
           </button>
         </div>
+      </div>
 
-        {/* Display Products with Loading State */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-red-600"></div>
-          </div>
-        ) : filterCategory ? (
-          <div className="mb-12">
-            <h2
-              className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-white" : "text-red-600"
+      {/* Display Products with Loading State */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-red-600"></div>
+        </div>
+      ) : filterCategory ? (
+        <div className="mb-12">
+          <h2
+            className={`text-xl md:text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+              isDarkMode ? "text-white" : "text-red-600"
+            }`}
+          >
+            {categories.find((cat) => cat.id === filterCategory)?.name ||
+              "Section"}
+          </h2>
+          {displayedProducts.length === 0 ? (
+            <p
+              className={`text-base md:text-lg transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-stone-300" : "text-stone-600"
               }`}
             >
-              {categories.find((cat) => cat.id === filterCategory)?.name ||
-                "Section"}
-            </h2>
-            {displayedProducts.length === 0 ? (
-              <p
-                className={`text-lg transition-colors duration-300 ease-in-out ${
-                  isDarkMode ? "text-stone-300" : "text-stone-600"
-                }`}
-              >
-                No products found in this section.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {displayedProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className={`p-4 border rounded-md shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${
-                      isDarkMode
-                        ? "border-stone-600 bg-stone-800"
-                        : "border-red-300 bg-white"
-                    }`}
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://via.placeholder.com/300x200.png?text=No+Image";
-                        console.error(
-                          `Failed to load image for ${product.name}`
-                        );
-                      }}
-                    />
-                    <h3
-                      className={`text-lg font-medium mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-white" : "text-red-600"
-                      }`}
-                    >
-                      {product.name}
-                    </h3>
-                    <p
-                      className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      {product.description}
-                    </p>
-                    <p
-                      className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      Price: ${product.price.toFixed(2)}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          lastAddToCartClick.current = Date.now();
-                          handleAddToCart(product);
-                        }}
-                        className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1"
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        onClick={() => navigate(`/shop/product/${product.id}`)}
-                        className={`bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 ${
-                          isDarkMode ? "bg-gray-500" : "bg-gray-600"
-                        }`}
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : showAll ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {displayedProducts.map((product) => (
-              <div
-                key={product.id}
-                className={`p-4 border rounded-md shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${
-                  isDarkMode
-                    ? "border-stone-600 bg-stone-800"
-                    : "border-red-300 bg-white"
-                }`}
-              >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/300x200.png?text=No+Image";
-                    console.error(`Failed to load image for ${product.name}`);
-                  }}
-                />
-                <h3
-                  className={`text-lg font-medium mb-2 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-white" : "text-red-600"
+              No products found in this section.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {displayedProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className={`p-3 md:p-4 border rounded-md shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${
+                    isDarkMode
+                      ? "border-stone-600 bg-stone-800"
+                      : "border-red-300 bg-white"
                   }`}
                 >
-                  {product.name}
-                </h3>
-                <p
-                  className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-stone-300" : "text-stone-600"
-                  }`}
-                >
-                  {product.description}
-                </p>
-                <p
-                  className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                    isDarkMode ? "text-stone-300" : "text-stone-600"
-                  }`}
-                >
-                  Price: ${product.price.toFixed(2)}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      lastAddToCartClick.current = Date.now();
-                      handleAddToCart(product);
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-40 md:h-48 object-cover rounded-md mb-3 md:mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
+                    onError={(e) => {
+                      e.target.src = "/UW_placeholder.jpg";
+                      console.error(`Failed to load image for ${product.name}`);
                     }}
-                    className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1"
-                  >
-                    Add to Cart
-                  </button>
-                  <button
-                    onClick={() => navigate(`/shop/product/${product.id}`)}
-                    className={`bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 ${
-                      isDarkMode ? "bg-gray-500" : "bg-gray-600"
+                  />
+                  <h3
+                    className={`text-base md:text-lg font-medium mb-2 transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-white" : "text-red-600"
                     }`}
                   >
-                    View Details
-                  </button>
+                    {product.name}
+                  </h3>
+                  <p
+                    className={`text-xs md:text-sm mb-2 transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-300" : "text-stone-600"
+                    }`}
+                  >
+                    {product.description}
+                  </p>
+                  <p
+                    className={`text-xs md:text-sm mb-3 md:mb-4 transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-300" : "text-stone-600"
+                    }`}
+                  >
+                    Price: ${product.price.toFixed(2)}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        lastAddToCartClick.current = Date.now();
+                        handleAddToCart(product);
+                      }}
+                      className="add-to-cart-button bg-red-800 text-white px-3 py-1 md:px-4 md:py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1 text-sm md:text-base"
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      onClick={() => navigate(`/shop/product/${product.id}`)}
+                      className={`bg-gray-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 text-sm md:text-base ${
+                        isDarkMode ? "bg-gray-500" : "bg-gray-600"
+                      }`}
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          categories.map((category) => (
-            <div key={category.id} className="mb-12">
-              <h2
-                className={`text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+              ))}
+            </div>
+          )}
+        </div>
+      ) : showAll ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          {displayedProducts.map((product) => (
+            <div
+              key={product.id}
+              className={`p-3 md:p-4 border rounded-md shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${
+                isDarkMode
+                  ? "border-stone-600 bg-stone-800"
+                  : "border-red-300 bg-white"
+              }`}
+            >
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-40 md:h-48 object-cover rounded-md mb-3 md:mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
+                onError={(e) => {
+                  e.target.src = "/UW_placeholder.jpg";
+                  console.error(`Failed to load image for ${product.name}`);
+                }}
+              />
+              <h3
+                className={`text-base md:text-lg font-medium mb-2 transition-colors duration-300 ease-in-out ${
                   isDarkMode ? "text-white" : "text-red-600"
                 }`}
               >
-                {category.name}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {sortProducts(
-                  products.filter(
-                    (product) => product.categoryId === category.id
-                  )
-                ).map((product) => (
-                  <div
-                    key={product.id}
-                    className={`p-4 border rounded-md shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${
-                      isDarkMode
-                        ? "border-stone-600 bg-stone-800"
-                        : "border-red-300 bg-white"
-                    }`}
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://via.placeholder.com/300x200.png?text=No+Image";
-                        console.error(
-                          `Failed to load image for ${product.name}`
-                        );
-                      }}
-                    />
-                    <h3
-                      className={`text-lg font-medium mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-white" : "text-red-600"
-                      }`}
-                    >
-                      {product.name}
-                    </h3>
-                    <p
-                      className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      {product.description}
-                    </p>
-                    <p
-                      className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-stone-300" : "text-stone-600"
-                      }`}
-                    >
-                      Price: ${product.price.toFixed(2)}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          lastAddToCartClick.current = Date.now();
-                          handleAddToCart(product);
-                        }}
-                        className="add-to-cart-button bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1"
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        onClick={() => navigate(`/shop/product/${product.id}`)}
-                        className={`bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 ${
-                          isDarkMode ? "bg-gray-500" : "bg-gray-600"
-                        }`}
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                {product.name}
+              </h3>
+              <p
+                className={`text-xs md:text-sm mb-2 transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-stone-300" : "text-stone-600"
+                }`}
+              >
+                {product.description}
+              </p>
+              <p
+                className={`text-xs md:text-sm mb-3 md:mb-4 transition-colors duration-300 ease-in-out ${
+                  isDarkMode ? "text-stone-300" : "text-stone-600"
+                }`}
+              >
+                Price: ${product.price.toFixed(2)}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    lastAddToCartClick.current = Date.now();
+                    handleAddToCart(product);
+                  }}
+                  className="add-to-cart-button bg-red-800 text-white px-3 py-1 md:px-4 md:py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1 text-sm md:text-base"
+                >
+                  Add to Cart
+                </button>
+                <button
+                  onClick={() => navigate(`/shop/product/${product.id}`)}
+                  className={`bg-gray-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 text-sm md:text-base ${
+                    isDarkMode ? "bg-gray-500" : "bg-gray-600"
+                  }`}
+                >
+                  View Details
+                </button>
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        categories.map((category) => (
+          <div key={category.id} className="mb-12">
+            <h2
+              className={`text-xl md:text-2xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${
+                isDarkMode ? "text-white" : "text-red-600"
+              }`}
+            >
+              {category.name}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {sortProducts(
+                products.filter((product) => product.categoryId === category.id)
+              ).map((product) => (
+                <div
+                  key={product.id}
+                  className={`p-3 md:p-4 border rounded-md shadow-md transition-all duration-300 ease-in-out hover:shadow-lg ${
+                    isDarkMode
+                      ? "border-stone-600 bg-stone-800"
+                      : "border-red-300 bg-white"
+                  }`}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-40 md:h-48 object-cover rounded-md mb-3 md:mb-4 transition-transform duration-300 ease-in-out hover:scale-105"
+                    onError={(e) => {
+                      e.target.src = "/UW_placeholder.jpg";
+                      console.error(`Failed to load image for ${product.name}`);
+                    }}
+                  />
+                  <h3
+                    className={`text-base md:text-lg font-medium mb-2 transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-white" : "text-red-600"
+                    }`}
+                  >
+                    {product.name}
+                  </h3>
+                  <p
+                    className={`text-xs md:text-sm mb-2 transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-300" : "text-stone-600"
+                    }`}
+                  >
+                    {product.description}
+                  </p>
+                  <p
+                    className={`text-xs md:text-sm mb-3 md:mb-4 transition-colors duration-300 ease-in-out ${
+                      isDarkMode ? "text-stone-300" : "text-stone-600"
+                    }`}
+                  >
+                    Price: ${product.price.toFixed(2)}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        lastAddToCartClick.current = Date.now();
+                        handleAddToCart(product);
+                      }}
+                      className="add-to-cart-button bg-red-800 text-white px-3 py-1 md:px-4 md:py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out flex-1 text-sm md:text-base"
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      onClick={() => navigate(`/shop/product/${product.id}`)}
+                      className={`bg-gray-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-md font-semibold hover:bg-gray-700 active:bg-gray-800 transition-all duration-300 ease-in-out flex-1 text-sm md:text-base ${
+                        isDarkMode ? "bg-gray-500" : "bg-gray-600"
+                      }`}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      )}
 
       {/* Backdrop and Mini Cart Sidebar */}
       {isMiniCartOpen && (
         <>
-          {/* Backdrop */}
           <div
             className={`mini-cart-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 active`}
             onClick={(e) => {
@@ -555,10 +575,8 @@ function Products() {
               setIsMiniCartOpen(false);
             }}
           ></div>
-
-          {/* Mini Cart Sidebar */}
           <div
-            className={`mini-cart-sidebar w-80 p-6 border-l shadow-lg h-screen fixed right-0 top-0 z-50 overflow-y-auto transition-transform duration-300 ease-in-out transform ${
+            className={`mini-cart-sidebar w-64 md:w-80 p-4 md:p-6 border-l shadow-lg h-screen fixed right-0 top-0 z-50 overflow-y-auto transition-transform duration-300 ease-in-out transform ${
               isMiniCartOpen ? "translate-x-0" : "translate-x-full"
             } ${
               isDarkMode
@@ -571,7 +589,7 @@ function Products() {
             >
               <div className="flex justify-between items-center mb-6">
                 <h2
-                  className={`text-xl font-semibold transition-colors duration-300 ease-in-out ${
+                  className={`text-lg md:text-xl font-semibold transition-colors duration-300 ease-in-out ${
                     isDarkMode ? "text-white" : "text-red-600"
                   }`}
                 >
@@ -583,7 +601,7 @@ function Products() {
                     console.log("Close button clicked, closing sidebar");
                     setIsMiniCartOpen(false);
                   }}
-                  className={`text-lg transition-colors duration-300 ease-in-out ${
+                  className={`text-base md:text-lg transition-colors duration-300 ease-in-out ${
                     isDarkMode
                       ? "text-stone-300 hover:text-red-400"
                       : "text-stone-600 hover:text-red-600"
@@ -594,7 +612,7 @@ function Products() {
               </div>
               {!Array.isArray(cart) || cart.length === 0 ? (
                 <p
-                  className={`text-sm transition-colors duration-300 ease-in-out ${
+                  className={`text-xs md:text-sm transition-colors duration-300 ease-in-out ${
                     isDarkMode ? "text-stone-300" : "text-stone-600"
                   }`}
                 >
@@ -617,15 +635,14 @@ function Products() {
                           <img
                             src={item.image}
                             alt={item.name}
-                            className="w-16 h-16 object-cover rounded-md"
+                            className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-md"
                             onError={(e) => {
-                              e.target.src =
-                                "https://via.placeholder.com/300x200.png?text=No+Image";
+                              e.target.src = "/UW_placeholder.jpg";
                             }}
                           />
                           <div className="flex-1">
                             <p
-                              className={`text-sm font-medium transition-colors duration-300 ease-in-out ${
+                              className={`text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out ${
                                 isDarkMode ? "text-white" : "text-red-600"
                               }`}
                             >
@@ -650,7 +667,7 @@ function Products() {
                                   >
                                     <svg
                                       xmlns="http://www.w3.org/2000/svg"
-                                      className="h-5 w-5"
+                                      className="h-4 w-4 md:h-5 md:w-5"
                                       fill="none"
                                       viewBox="0 0 24 24"
                                       stroke="currentColor"
@@ -672,13 +689,13 @@ function Products() {
                                         item.quantity - 1
                                       );
                                     }}
-                                    className="text-black px-2 py-1 rounded-full hover:bg-gray-200 active:bg-gray-300 transition-all duration-300 ease-in-out"
+                                    className="text-black px-1 md:px-2 py-1 rounded-full hover:bg-gray-200 active:bg-gray-300 transition-all duration-300 ease-in-out"
                                   >
                                     -
                                   </button>
                                 )}
                                 <span
-                                  className={`text-sm mx-2 transition-colors duration-300 ease-in-out ${
+                                  className={`text-xs md:text-sm mx-2 transition-colors duration-300 ease-in-out ${
                                     isDarkMode ? "text-white" : "text-red-600"
                                   }`}
                                 >
@@ -689,7 +706,7 @@ function Products() {
                                     e.stopPropagation();
                                     updateQuantity(item.id, item.quantity + 1);
                                   }}
-                                  className="text-black px-2 py-1 rounded-full hover:bg-gray-200 active:bg-gray-300 transition-all duration-300 ease-in-out"
+                                  className="text-black px-1 md:px-2 py-1 rounded-full hover:bg-gray-200 active:bg-gray-300 transition-all duration-300 ease-in-out"
                                 >
                                   +
                                 </button>
@@ -701,7 +718,7 @@ function Products() {
                               e.stopPropagation();
                               removeFromCart(item.id);
                             }}
-                            className="text-red-600 hover:text-red-800 active:text-red-900 transition-colors duration-300 ease-in-out"
+                            className="text-red-600 hover:text-red-800 active:text-red-900 transition-all duration-300 ease-in-out"
                           >
                             ✕
                           </button>
@@ -711,7 +728,7 @@ function Products() {
                   </TransitionGroup>
                   <div className="border-t pt-4 mt-4">
                     <p
-                      className={`text-lg font-semibold transition-colors duration-300 ease-in-out ${
+                      className={`text-base md:text-lg font-semibold transition-colors duration-300 ease-in-out ${
                         isDarkMode ? "text-white" : "text-red-600"
                       }`}
                     >
@@ -723,7 +740,7 @@ function Products() {
                         setIsMiniCartOpen(false);
                         navigate("/cart");
                       }}
-                      className="w-full bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out mt-4"
+                      className="w-full bg-red-800 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-900 active:bg-red-950 transition-all duration-300 ease-in-out mt-4 text-sm md:text-base"
                     >
                       Go to Cart
                     </button>
@@ -733,7 +750,7 @@ function Products() {
                         setIsMiniCartOpen(false);
                         navigate("/cart");
                       }}
-                      className="w-full bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 active:bg-red-800 transition-all duration-300 ease-in-out mt-2"
+                      className="w-full bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 active:bg-red-800 transition-all duration-300 ease-in-out mt-2 text-sm md:text-base"
                     >
                       Proceed to Checkout
                     </button>
