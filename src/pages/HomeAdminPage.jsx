@@ -11,7 +11,7 @@ function HomeAdminPage() {
   const [workoutDesc, setWorkoutDesc] = useState("");
   const [warmupExercises, setWarmupExercises] = useState([""]);
   const [workoutSections, setWorkoutSections] = useState([
-    { title: "Main Workout", exercises: [""] }, // Default section
+    { title: "Main Workout", exercises: [""] },
   ]);
   const [scheduledWorkouts, setScheduledWorkouts] = useState([]);
   const [aboutUs, setAboutUs] = useState("");
@@ -43,7 +43,6 @@ function HomeAdminPage() {
               ? data.currentWorkout.warmup
               : [""]
           );
-          // Load dynamic workout sections
           setWorkoutSections(
             data.currentWorkout?.sections?.length
               ? data.currentWorkout.sections
@@ -51,16 +50,30 @@ function HomeAdminPage() {
           );
           setScheduledWorkouts(
             data.scheduledWorkouts?.length
-              ? data.scheduledWorkouts.map((workout) => ({
-                  ...workout,
-                  warmup: workout.warmup || [""],
-                  main: workout.main || [""],
-                }))
+              ? data.scheduledWorkouts.map((workout) => {
+                  // Migrate old structure to new structure if necessary
+                  const sections = workout.sections?.length
+                    ? workout.sections
+                    : [
+                        { title: "Warm Up", exercises: workout.warmup || [""] },
+                        {
+                          title: "Main Workout",
+                          exercises: workout.main || [""],
+                        },
+                      ];
+                  return {
+                    description: workout.description || "",
+                    sections,
+                    updateDateTime: workout.updateDateTime || "",
+                  };
+                })
               : [
                   {
                     description: "",
-                    warmup: [""],
-                    main: [""],
+                    sections: [
+                      { title: "Warm Up", exercises: [""] },
+                      { title: "Main Workout", exercises: [""] },
+                    ],
                     updateDateTime: "",
                   },
                 ]
@@ -98,13 +111,25 @@ function HomeAdminPage() {
         .filter(
           (workout) =>
             workout.description.trim() &&
-            (workout.warmup.length > 0 || workout.main.length > 0) &&
+            workout.sections.some(
+              (section) =>
+                section.title.trim() &&
+                section.exercises.some((ex) => ex.trim())
+            ) &&
             workout.updateDateTime.trim()
         )
         .map((workout) => ({
           description: workout.description,
-          warmup: workout.warmup.filter((ex) => ex.trim() !== ""),
-          main: workout.main.filter((ex) => ex.trim() !== ""),
+          sections: workout.sections
+            .filter(
+              (section) =>
+                section.title.trim() &&
+                section.exercises.some((ex) => ex.trim())
+            )
+            .map((section) => ({
+              title: section.title,
+              exercises: section.exercises.filter((ex) => ex.trim() !== ""),
+            })),
           updateDateTime: workout.updateDateTime,
         })),
       aboutUs: aboutUs.trim(),
@@ -180,7 +205,14 @@ function HomeAdminPage() {
   const addScheduledWorkout = () =>
     setScheduledWorkouts([
       ...scheduledWorkouts,
-      { description: "", warmup: [""], main: [""], updateDateTime: "" },
+      {
+        description: "",
+        sections: [
+          { title: "Warm Up", exercises: [""] },
+          { title: "Main Workout", exercises: [""] },
+        ],
+        updateDateTime: "",
+      },
     ]);
   const removeScheduledWorkout = (index) =>
     setScheduledWorkouts(scheduledWorkouts.filter((_, i) => i !== index));
@@ -190,39 +222,59 @@ function HomeAdminPage() {
     setScheduledWorkouts(newScheduledWorkouts);
   };
 
-  const addScheduledWarmupExercise = (index) => {
+  const addScheduledWorkoutSection = (workoutIndex) => {
     const newScheduledWorkouts = [...scheduledWorkouts];
-    newScheduledWorkouts[index].warmup.push("");
+    newScheduledWorkouts[workoutIndex].sections.push({
+      title: "",
+      exercises: [""],
+    });
     setScheduledWorkouts(newScheduledWorkouts);
   };
-  const removeScheduledWarmupExercise = (index, exerciseIndex) => {
+  const removeScheduledWorkoutSection = (workoutIndex, sectionIndex) => {
     const newScheduledWorkouts = [...scheduledWorkouts];
-    newScheduledWorkouts[index].warmup = newScheduledWorkouts[
-      index
-    ].warmup.filter((_, i) => i !== exerciseIndex);
+    newScheduledWorkouts[workoutIndex].sections = newScheduledWorkouts[
+      workoutIndex
+    ].sections.filter((_, i) => i !== sectionIndex);
     setScheduledWorkouts(newScheduledWorkouts);
   };
-  const updateScheduledWarmupExercise = (index, exerciseIndex, value) => {
+  const updateScheduledWorkoutSectionTitle = (
+    workoutIndex,
+    sectionIndex,
+    value
+  ) => {
     const newScheduledWorkouts = [...scheduledWorkouts];
-    newScheduledWorkouts[index].warmup[exerciseIndex] = value;
+    newScheduledWorkouts[workoutIndex].sections[sectionIndex].title = value;
     setScheduledWorkouts(newScheduledWorkouts);
   };
-
-  const addScheduledMainExercise = (index) => {
+  const addScheduledSectionExercise = (workoutIndex, sectionIndex) => {
     const newScheduledWorkouts = [...scheduledWorkouts];
-    newScheduledWorkouts[index].main.push("");
-    setScheduledWorkouts(newScheduledWorkouts);
-  };
-  const removeScheduledMainExercise = (index, exerciseIndex) => {
-    const newScheduledWorkouts = [...scheduledWorkouts];
-    newScheduledWorkouts[index].main = newScheduledWorkouts[index].main.filter(
-      (_, i) => i !== exerciseIndex
+    newScheduledWorkouts[workoutIndex].sections[sectionIndex].exercises.push(
+      ""
     );
     setScheduledWorkouts(newScheduledWorkouts);
   };
-  const updateScheduledMainExercise = (index, exerciseIndex, value) => {
+  const removeScheduledSectionExercise = (
+    workoutIndex,
+    sectionIndex,
+    exerciseIndex
+  ) => {
     const newScheduledWorkouts = [...scheduledWorkouts];
-    newScheduledWorkouts[index].main[exerciseIndex] = value;
+    newScheduledWorkouts[workoutIndex].sections[sectionIndex].exercises =
+      newScheduledWorkouts[workoutIndex].sections[
+        sectionIndex
+      ].exercises.filter((_, i) => i !== exerciseIndex);
+    setScheduledWorkouts(newScheduledWorkouts);
+  };
+  const updateScheduledSectionExercise = (
+    workoutIndex,
+    sectionIndex,
+    exerciseIndex,
+    value
+  ) => {
+    const newScheduledWorkouts = [...scheduledWorkouts];
+    newScheduledWorkouts[workoutIndex].sections[sectionIndex].exercises[
+      exerciseIndex
+    ] = value;
     setScheduledWorkouts(newScheduledWorkouts);
   };
 
@@ -486,84 +538,92 @@ function HomeAdminPage() {
               placeholder="Workout Description"
             />
 
-            <h4
-              className={`text-lg transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-blue-300" : "text-blue-600"
-              } mt-2 mb-2`}
-            >
-              Warm Up Exercises
-            </h4>
-            {workout.warmup.map((exercise, exIndex) => (
-              <div key={`warmup-${index}-${exIndex}`} className="flex mb-2">
-                <input
-                  type="text"
-                  value={exercise}
-                  onChange={(e) =>
-                    updateScheduledWarmupExercise(
-                      index,
-                      exIndex,
-                      e.target.value
-                    )
-                  }
-                  className={`border p-2 w-full mr-2 ${
-                    isDarkMode
-                      ? "bg-stone-700 border-stone-600 text-white"
-                      : "bg-white border-red-300 text-red-600"
-                  }`}
-                  placeholder={`Warm Up ${exIndex + 1}`}
-                />
+            {workout.sections.map((section, sectionIndex) => (
+              <div
+                key={`scheduled-section-${index}-${sectionIndex}`}
+                className="mt-4"
+              >
+                <div className="flex items-center mb-2">
+                  <input
+                    type="text"
+                    value={section.title}
+                    onChange={(e) =>
+                      updateScheduledWorkoutSectionTitle(
+                        index,
+                        sectionIndex,
+                        e.target.value
+                      )
+                    }
+                    className={`border p-2 w-full mr-2 ${
+                      isDarkMode
+                        ? "bg-stone-700 border-stone-600 text-white"
+                        : "bg-white border-red-300 text-red-600"
+                    }`}
+                    placeholder="Section Title (e.g., Strength, Conditioning)"
+                  />
+                  <button
+                    onClick={() =>
+                      removeScheduledWorkoutSection(index, sectionIndex)
+                    }
+                    className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                    disabled={workout.sections.length === 1}
+                  >
+                    Remove Section
+                  </button>
+                </div>
+                {section.exercises.map((exercise, exIndex) => (
+                  <div
+                    key={`scheduled-section-${index}-${sectionIndex}-exercise-${exIndex}`}
+                    className="flex mb-2"
+                  >
+                    <input
+                      type="text"
+                      value={exercise}
+                      onChange={(e) =>
+                        updateScheduledSectionExercise(
+                          index,
+                          sectionIndex,
+                          exIndex,
+                          e.target.value
+                        )
+                      }
+                      className={`border p-2 w-full mr-2 ${
+                        isDarkMode
+                          ? "bg-stone-700 border-stone-600 text-white"
+                          : "bg-white border-red-300 text-red-600"
+                      }`}
+                      placeholder={`Exercise ${exIndex + 1}`}
+                    />
+                    <button
+                      onClick={() =>
+                        removeScheduledSectionExercise(
+                          index,
+                          sectionIndex,
+                          exIndex
+                        )
+                      }
+                      className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
+                      disabled={section.exercises.length === 1}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
                 <button
-                  onClick={() => removeScheduledWarmupExercise(index, exIndex)}
-                  className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-                  disabled={workout.warmup.length === 1}
+                  onClick={() =>
+                    addScheduledSectionExercise(index, sectionIndex)
+                  }
+                  className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
                 >
-                  Remove
+                  Add Exercise
                 </button>
               </div>
             ))}
             <button
-              onClick={() => addScheduledWarmupExercise(index)}
-              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2 mb-4"
+              onClick={() => addScheduledWorkoutSection(index)}
+              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-4 mr-2"
             >
-              Add Warm Up Exercise
-            </button>
-
-            <h4
-              className={`text-lg transition-colors duration-300 ease-in-out ${
-                isDarkMode ? "text-red-400" : "text-red-800"
-              } mt-2 mb-2`}
-            >
-              Main Workout Exercises
-            </h4>
-            {workout.main.map((exercise, exIndex) => (
-              <div key={`main-${index}-${exIndex}`} className="flex mb-2">
-                <input
-                  type="text"
-                  value={exercise}
-                  onChange={(e) =>
-                    updateScheduledMainExercise(index, exIndex, e.target.value)
-                  }
-                  className={`border p-2 w-full mr-2 ${
-                    isDarkMode
-                      ? "bg-stone-700 border-stone-600 text-white"
-                      : "bg-white border-red-300 text-red-600"
-                  }`}
-                  placeholder={`Main Exercise ${exIndex + 1}`}
-                />
-                <button
-                  onClick={() => removeScheduledMainExercise(index, exIndex)}
-                  className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-                  disabled={workout.main.length === 1}
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => addScheduledMainExercise(index)}
-              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2 mr-2"
-            >
-              Add Main Exercise
+              Add Workout Section
             </button>
 
             <button
@@ -632,7 +692,8 @@ function HomeAdminPage() {
       </button>
       <button
         onClick={() => navigate("/admin")}
-        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
+        className="bg-red-8
+00 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
       >
         Back to Admin Dashboard
       </button>
