@@ -51,7 +51,6 @@ function HomeAdminPage() {
           setScheduledWorkouts(
             data.scheduledWorkouts?.length
               ? data.scheduledWorkouts.map((workout) => {
-                  // Migrate old structure to new structure if necessary
                   const sections = workout.sections?.length
                     ? workout.sections
                     : [
@@ -74,7 +73,7 @@ function HomeAdminPage() {
                       { title: "Warm Up", exercises: [""] },
                       { title: "Main Workout", exercises: [""] },
                     ],
-                    updateDateTime: "",
+                    updateDateTime: new Date().toISOString(),
                   },
                 ]
           );
@@ -211,14 +210,35 @@ function HomeAdminPage() {
           { title: "Warm Up", exercises: [""] },
           { title: "Main Workout", exercises: [""] },
         ],
-        updateDateTime: "",
+        updateDateTime: new Date().toISOString(),
       },
     ]);
   const removeScheduledWorkout = (index) =>
     setScheduledWorkouts(scheduledWorkouts.filter((_, i) => i !== index));
+
+  // Convert UTC ISO string to EST (UTC-5) for datetime-local format (YYYY-MM-DDThh:mm)
+  const toESTDateTimeString = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    // EST is UTC-5, so subtract 5 hours (5 * 60 * 60 * 1000 milliseconds)
+    const estDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
+    return estDate.toISOString().slice(0, 16);
+  };
+
   const updateScheduledWorkout = (index, field, value) => {
     const newScheduledWorkouts = [...scheduledWorkouts];
-    newScheduledWorkouts[index][field] = value;
+    if (field === "updateDateTime") {
+      // Treat the selected time as EST (UTC-5) and convert to UTC for storage
+      const estDate = new Date(value);
+      // Subtract 5 hours to convert EST to UTC
+      const utcDate = new Date(estDate.getTime() - 5 * 60 * 60 * 1000);
+      newScheduledWorkouts[index][field] = utcDate.toISOString();
+      console.log(
+        `Scheduled workout ${index} updateDateTime set to (UTC): ${newScheduledWorkouts[index][field]}`
+      );
+    } else {
+      newScheduledWorkouts[index][field] = value;
+    }
     setScheduledWorkouts(newScheduledWorkouts);
   };
 
@@ -506,17 +526,9 @@ function HomeAdminPage() {
           >
             <input
               type="datetime-local"
-              value={
-                workout.updateDateTime
-                  ? workout.updateDateTime.slice(0, 16)
-                  : ""
-              }
+              value={toESTDateTimeString(workout.updateDateTime)}
               onChange={(e) =>
-                updateScheduledWorkout(
-                  index,
-                  "updateDateTime",
-                  new Date(e.target.value).toISOString()
-                )
+                updateScheduledWorkout(index, "updateDateTime", e.target.value)
               }
               className={`border p-2 w-full mb-2 ${
                 isDarkMode
@@ -692,8 +704,7 @@ function HomeAdminPage() {
       </button>
       <button
         onClick={() => navigate("/admin")}
-        className="bg-red-8
-00 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
+        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mr-4"
       >
         Back to Admin Dashboard
       </button>
