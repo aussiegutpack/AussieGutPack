@@ -12,12 +12,12 @@
     "preview": "vite preview",
     "tailwind": "tailwindcss",
     "predeploy": "npm run build",
-    "deploy": "npm run build:github && cp dist/index.html dist/404.html && gh-pages -d dist"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@shadcn/ui": "^0.0.4",
-    "@supabase/supabase-js": "^2.49.4",
+    "@supabase/supabase-js": "^2.49.8",
     "@tailwindcss/vite": "^4.0.3",
     "dotenv": "^16.4.7",
     "firebase": "^11.5.0",
