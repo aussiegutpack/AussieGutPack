@@ -7,12 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "build:vercel": "vite build --mode vercel",
-    "build:github": "VITE_BASE_PATH=/aussie-gut-pack/ REACT_APP_BASE_PATH=/aussie-gut-pack/ vite build --mode github",
+    "build:github": "VITE_BASE_PATH=/AussieGutPack/ REACT_APP_BASE_PATH=/AussieGutPack/ vite build --mode github",
     "lint": "eslint .",
     "preview": "vite preview",
     "tailwind": "tailwindcss",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "npm run build:github && gh-pages -d dist"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -48,5 +47,5 @@
     "tailwindcss": "^4.0.3",
     "vite": "^6.0.5"
   },
-  "homepage": "https://IAmTommyZombie.github.io/aussie-gut-pack"
+  "homepage": "https://aussiegutpack.github.io/AussieGutPack"
 }

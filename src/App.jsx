@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, createContext, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import Layout from "./components/layout/Layout";
