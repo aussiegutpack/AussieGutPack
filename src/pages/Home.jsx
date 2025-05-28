@@ -183,10 +183,7 @@ function Home() {
             if (upcomingPosts.length > 0) {
               const upcomingPost = upcomingPosts[0];
               const upcomingExcerpt = getExcerpt(upcomingPost);
-              setUpcomingBlogPost({
-                ...upcomingPost,
-                excerpt: upcomingExcerpt,
-              });
+              setUpcomingBlogPost({ ...upcomingPost, excerpt: upcomingExcerpt });
             }
           }
         } catch (err) {
@@ -217,8 +214,7 @@ function Home() {
   }, []);
 
   const getExcerpt = (post) => {
-    if (!post || !post.blocks || post.blocks.length === 0)
-      return "Read more...";
+    if (!post || !post.blocks || post.blocks.length === 0) return "Read more...";
     const firstTextBlock = post.blocks.find(
       (block) =>
         block.type === "paragraph" ||
@@ -246,9 +242,7 @@ function Home() {
         entries.forEach((entry) => {
           const isVisible = entry.isIntersecting;
           console.log(
-            `IntersectionObserver: ${
-              entry.target === headerRef.current ? "headerRef" : "roofRef"
-            } isIntersecting: ${isVisible}`
+            `IntersectionObserver: ${entry.target === headerRef.current ? "headerRef" : "roofRef"} isIntersecting: ${isVisible}`
           );
           if (entry.target === headerRef.current) setIsHeaderVisible(isVisible);
           if (entry.target === roofRef.current) setIsRoofVisible(isVisible);
@@ -339,10 +333,8 @@ function Home() {
       completedChallenges.includes(index)
     );
 
-  const baseUrl = "https://aussiegutpack.com";
-  const currentUrl = `${baseUrl}${
-    location.pathname === "/" ? "" : location.pathname
-  }`;
+  const baseUrl = "https://aussiegutpack.github.io/AussieGutPack";
+  const currentUrl = `${baseUrl}${ location.pathname === "/" ? "" : location.pathname }`;
 
   return (
     <>
@@ -408,17 +400,13 @@ function Home() {
       </Helmet>
       <main
         id="main-content"
-        className={`min-h-screen flex flex-col ${
-          isDarkMode ? "bg-stone-900" : "bg-white"
-        }`}
+        className={`min-h-screen flex flex-col ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
         style={{ minHeight: "100vh" }} // Ensure main takes up full viewport height
       >
         {isLoading ? (
           <div className="flex justify-center items-center min-h-screen">
             <p
-              className={`text-xl ${
-                isDarkMode ? "text-white" : "text-red-600"
-              }`}
+              className={`text-xl ${isDarkMode ? "text-white" : "text-red-600"}`}
             >
               Loading content...
             </p>
@@ -430,17 +418,13 @@ function Home() {
             {console.log("Rendering sections, content:", content)}
             <section
               ref={headerRef}
-              className={`py-10 px-6 ${
-                isDarkMode ? "bg-stone-900" : "bg-white"
-              }`}
-              style={{ minHeight: "400px" }} // Increased minHeight to ensure visibility
+              className={`py-2 px-6 ${isDarkMode ? "bg-stone-900" : "bg-white"}`}
+              style={{ minHeight: "150px" }} // Further reduced minHeight
             >
               <div className="container mx-auto text-center">
                 <header>
                   <h1
-                    className={`text-4xl font-bold mb-8 transition-colors duration-300 ease-in-out ${
-                      isDarkMode ? "text-red-400" : "text-red-800"
-                    }`}
+                    className={`text-4xl font-bold mb-8 transition-colors duration-300 ease-in-out ${isDarkMode ? "text-red-400" : "text-red-800"}`}
                   >
                     Welcome to Primal Biome
                   </h1>
@@ -452,27 +436,52 @@ function Home() {
                 </header>
               </div>
             </section>
-            <section className={`py-8 px-6 ${ // Reduced top padding
-              isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"
-            }`}>
+
+            {/* About Us Section */}
+            <section className={`pt-4 pb-8 px-6 w-full ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`}>
               <div className="container mx-auto text-left p-6">
                 <h3 className={`text-3xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${isDarkMode ? "text-red-400" : "text-red-800"}`}>About Us</h3>
                 <p className={`text-lg ${isDarkMode ? "text-white" : "text-stone-700"}`}>{content.aboutUs}</p>
               </div>
             </section>
-            <section className="workout-section" aria-labelledby="workout-heading">
-              <h3 
-                id="workout-heading" 
-                className={`text-4xl font-bold mb-8 transition-colors duration-300 ease-in-out ${isDarkMode ? "text-red-400" : "text-red-800"}`}
-              >
-                Workout of the Day
-              </h3>
-              <p>{content.currentWorkout.description}</p>
-              <h4>Warm Up</h4>
-              <ul>{content.currentWorkout.warmup.map(exercise => <li>{exercise}</li>)}</ul>
-              <h4>Main Workout</h4>
-              <ul>{content.currentWorkout.main.map(exercise => <li>{exercise}</li>)}</ul>
-            </section>
+
+            {/* Container for side-by-side sections: Workout and Daily Challenges */}
+            <div className="flex flex-wrap -mx-3 mt-8">
+
+              {/* Workout Section */}
+              <section className={`workout-section py-8 pl-6 pr-6 w-3 md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`} aria-labelledby="workout-heading">
+                <div className="container mx-auto text-left p-6">
+                  <h3
+                    id="workout-heading"
+                    className={`text-4xl font-bold mb-8 transition-colors duration-300 ease-in-out ${isDarkMode ? "text-red-400" : "text-red-800"}`}
+                  >
+                    Workout of the Day
+                  </h3>
+                  <p className={`${isDarkMode ? "text-white" : "text-stone-700"}`}>{content.currentWorkout.description}</p>
+                  <h4 className={`mt-4 mb-2 ${isDarkMode ? "text-red-400" : "text-red-800"}`}>Warm Up</h4>
+                  <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>
+                    {content.currentWorkout.warmup.map((exercise, index) => <li key={index}>{exercise}</li>)}
+                  </ul>
+                  <h4 className={`mt-4 mb-2 ${isDarkMode ? "text-red-400" : "text-red-800"}`}>Main Workout</h4>
+                  <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>
+                    {content.currentWorkout.main.map((exercise, index) => <li key={index}>{exercise}</li>)}
+                  </ul>
+                </div>
+              </section>
+
+              {/* Daily Challenges Section */}
+              <section className={`py-8 px-3 w-full md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`}>
+                <div className="container mx-auto text-left p-6">
+                  <h3 className={`text-3xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${isDarkMode ? "text-red-400" : "text-red-800"}`}>Daily Challenges</h3>
+                  <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>
+                    {content.dailyChallenges.map((challenge, index) => (
+                      <li key={index}>{challenge}</li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+
+            </div>
           </>
         )}
       </main>
