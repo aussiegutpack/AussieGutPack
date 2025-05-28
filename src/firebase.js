@@ -1,25 +1,26 @@
-// src/firebase.js
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage"; // if you use storage
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-console.log("initializeApp:", typeof initializeApp); // Should log "function"
-console.log("getFirestore:", typeof getFirestore); // Should log "function" or "undefined"
-
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyAjVDbvzmbogD_lbGqB4MmVf3aTnTQzEh8",
+  authDomain: "aussie-gut-pack-a896e.firebaseapp.com",
+  projectId: "aussie-gut-pack-a896e",
+  storageBucket: "aussie-gut-pack-a896e.firebasestorage.app",
+  messagingSenderId: "817190270687",
+  appId: "1:817190270687:web:357c740b79d6e243e3db6a",
+  measurementId: "G-NEV6BN8ZKT"
 };
 
-const app = initializeApp(firebaseConfig);
-console.log("Firebase app:", app); // Should log an object
 
+const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-console.log("Firestore db:", db); // Should log an object or throw error
-export const storage = getStorage(app);
-export const auth = getAuth(app); // Export auth
+export const auth = getAuth(app);
+export const storage = getStorage(app); // if you use storage
