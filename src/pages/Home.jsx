@@ -446,10 +446,10 @@ function Home() {
             </section>
 
             {/* Container for side-by-side sections: Workout and Daily Challenges */}
-            <div className="flex flex-wrap -mx-3 mt-8">
+            <div className="flex flex-wrap -mx-6 mt-8">
 
               {/* Workout Section */}
-              <section className={`workout-section py-8 pl-6 pr-6 w-3 md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`} aria-labelledby="workout-heading">
+              <section className={`workout-section py-8 px-6 w-full md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`} aria-labelledby="workout-heading">
                 <div className="container mx-auto text-left p-6">
                   <h3
                     id="workout-heading"
@@ -458,19 +458,33 @@ function Home() {
                     Workout of the Day
                   </h3>
                   <p className={`${isDarkMode ? "text-white" : "text-stone-700"}`}>{content.currentWorkout.description}</p>
-                  <h4 className={`mt-4 mb-2 ${isDarkMode ? "text-red-400" : "text-red-800"}`}>Warm Up</h4>
-                  <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>
-                    {content.currentWorkout.warmup.map((exercise, index) => <li key={index}>{exercise}</li>)}
-                  </ul>
-                  <h4 className={`mt-4 mb-2 ${isDarkMode ? "text-red-400" : "text-red-800"}`}>Main Workout</h4>
-                  <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>
-                    {content.currentWorkout.main.map((exercise, index) => <li key={index}>{exercise}</li>)}
-                  </ul>
+
+                  {/* Render workout sections dynamically */}
+                  {content.currentWorkout.sections && content.currentWorkout.sections.length > 0 ? (
+                       content.currentWorkout.sections.map((section, sectionIndex) => (
+                         <div key={sectionIndex} className="mt-4">
+                           <h4 className={`mb-2 ${isDarkMode ? "text-red-400" : "text-red-800"}`}>{section.title}</h4>
+                           {section.exercises && section.exercises.length > 0 ? (
+                             <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>
+                               {section.exercises.map((exercise, exerciseIndex) => (
+                                 <li key={exerciseIndex}>{exercise}</li>
+                               ))}
+                             </ul>
+                           ) : (
+                             <p className={`${isDarkMode ? "text-white" : "text-stone-700"}`}>No exercises listed for this section.</p>
+                           )}
+                         </div>
+                       ))
+                  ) : (
+                       // Optional: Message if no sections are defined
+                       <p className={`${isDarkMode ? "text-white" : "text-stone-700"} mt-4`}>No workout sections defined.</p>
+                  )}
+
                 </div>
               </section>
 
               {/* Daily Challenges Section */}
-              <section className={`py-8 px-3 w-full md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`}>
+              <section className={`py-8 px-6 w-full md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`}>
                 <div className="container mx-auto text-left p-6">
                   <h3 className={`text-3xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${isDarkMode ? "text-red-400" : "text-red-800"}`}>Daily Challenges</h3>
                   <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>

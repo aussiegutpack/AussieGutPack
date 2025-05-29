@@ -1,6 +1,6 @@
 // src/App.jsx
-import React, { useState, createContext, useEffect } from "react";
-import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useState, createContext, useEffect, useContext } from "react";
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import Layout from "./components/layout/Layout";
@@ -35,6 +35,7 @@ import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Sitemap from "./pages/Sitemap";
 import "./styles/global.css";
+import LocationLogger from "./components/LocationLogger";
 
 export const ThemeContext = createContext();
 
@@ -49,15 +50,15 @@ function App() {
   }, [isDarkMode]);
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
-  const basename = import.meta.env.VITE_BASE_PATH || "/";
-  console.log("Basename:", basename);
+  console.log('Switched back to HashRouter');
 
   return (
     <HelmetProvider>
       <CartProvider>
         <AuthProvider>
           <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
-            <Router basename={basename}>
+            <Router>
+              <LocationLogger />
               <TransitionGroup>
                 <CSSTransition
                   key={window.location.pathname}

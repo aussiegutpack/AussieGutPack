@@ -1,21 +1,47 @@
 // src/pages/admin/AdminPage.jsx
 import React, { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ThemeContext } from "../App";
 import { auth } from "../firebase"; // Import auth from your firebase config
 import {
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
 } from "firebase/auth"; // Import Firebase Auth methods
+import { AuthContext } from "../context/AuthContext";
+import AdminHomePage from "./HomeAdminPage";
+import AdminBlogPage from "./BlogAdminPage";
+import ProductsAdminPage from "./ProductsAdminPage";
+import Layout from "../components/layout/Layout";
+import { Route, Routes } from "react-router-dom";
+
+console.log('AdminPage.jsx: Loading AdminPage component');
 
 function AdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
+  const { user, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  console.log('AdminPage.jsx: AdminPage rendering. User:', user ? 'Authenticated' : 'Not Authenticated', 'Loading:', loading);
+  console.log('AdminPage.jsx: Current location in AdminPage:', location.pathname, location.hash);
+
+  // Effect to check authentication status and redirect if necessary
+  useEffect(() => {
+    console.log('AdminPage.jsx: Auth check useEffect triggered. User:', user, 'Loading:', loading);
+    if (!loading && !user) {
+      console.log('AdminPage.jsx: User not authenticated, navigating to login');
+      // navigate("/login", { replace: true }); // Redirect to a login page if needed
+    } else if (!loading && user) {
+      console.log('AdminPage.jsx: User authenticated:', user);
+    }
+  }, [user, loading, navigate]);
+
   const [email, setEmail] = useState(""); // Add email state
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState(null); // Add error state for login failures
-  const navigate = useNavigate();
 
   // Check authentication state on mount
   useEffect(() => {
@@ -50,7 +76,15 @@ function AdminPage() {
     }
   };
 
-  if (!isAuthenticated) {
+  console.log('AdminPage.jsx: Render login form or admin content. User:', user);
+
+  if (loading) {
+    console.log('AdminPage.jsx: Still loading auth state...');
+    return <div className="text-center py-8">Loading authentication status...</div>;
+  }
+
+  if (!user) {
+    console.log('AdminPage.jsx: Rendering login form');
     return (
       <div
         className={`min-h-screen flex items-center justify-center ${
@@ -119,52 +153,16 @@ function AdminPage() {
     );
   }
 
+  console.log('AdminPage.jsx: Rendering admin content');
   return (
-    <div
-      className={`min-h-screen flex flex-col items-center justify-center ${
-        isDarkMode ? "bg-stone-900" : "bg-white"
-      }`}
-    >
-      <h2
-        className={`text-3xl transition-colors duration-300 ease-in-out ${
-          isDarkMode ? "text-red-400" : "text-red-800"
-        } mb-8`}
-      >
-        Admin Dashboard
-      </h2>
-      <div className="flex flex-col gap-4">
-        <button
-          onClick={() => navigate("/admin/home")}
-          className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-        >
-          Edit Home Page Content
-        </button>
-        <button
-          onClick={() => navigate("/admin/blog")}
-          className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-        >
-          Manage Blog Posts
-        </button>
-        <button
-          onClick={() => navigate("/admin/products")}
-          className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-        >
-          Manage Products
-        </button>
-        <button
-          onClick={() => navigate("/")}
-          className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-        >
-          Back to Home
-        </button>
-        <button
-          onClick={handleLogout}
-          className="bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-        >
-          Log Out
-        </button>
-      </div>
-    </div>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<AdminHomePage />} />
+        <Route path="/home" element={<AdminHomePage />} />
+        <Route path="/blog" element={<AdminBlogPage />} />
+        <Route path="/products" element={<ProductsAdminPage />} />
+      </Routes>
+    </Layout>
   );
 }
 

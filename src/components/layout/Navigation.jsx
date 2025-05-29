@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { ThemeContext } from "../../App";
 
-const Navigation = ({ location }) => {
+const Navigation = React.memo(({ location }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const { user, logout, loading } = useContext(AuthContext);
@@ -71,7 +71,7 @@ const Navigation = ({ location }) => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center relative z-50">
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold tracking-tight">
-            Aussie Gut Pack
+            Primal Biome
           </Link>
 
           {/* Desktop Menu */}
@@ -306,6 +306,6 @@ const Navigation = ({ location }) => {
       </nav>
     </>
   );
-};
+});
 
 export default Navigation;
