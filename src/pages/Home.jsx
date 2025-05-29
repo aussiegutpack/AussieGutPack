@@ -415,6 +415,7 @@ function Home() {
           <div className="text-center text-red-600 p-4">{error}</div>
         ) : (
           <>
+            {/* Render sections */}
             {console.log("Rendering sections, content:", content)}
             <section
               ref={headerRef}
