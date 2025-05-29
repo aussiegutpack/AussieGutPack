@@ -446,10 +446,10 @@ function Home() {
             </section>
 
             {/* Container for side-by-side sections: Workout and Daily Challenges */}
-            <div className="flex flex-wrap -mx-6 mt-8">
+            <div className="flex flex-wrap md:flex-nowrap max-w-screen-lg mx-auto mt-8 gap-6">
 
               {/* Workout Section */}
-              <section className={`workout-section py-8 px-6 w-full md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`} aria-labelledby="workout-heading">
+              <section className={`workout-section py-8 px-6 w-full md:w-1/2 flex-1 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`} aria-labelledby="workout-heading">
                 <div className="container mx-auto text-left p-6">
                   <h3
                     id="workout-heading"
@@ -484,7 +484,7 @@ function Home() {
               </section>
 
               {/* Daily Challenges Section */}
-              <section className={`py-8 px-6 w-full md:w-1/2 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`}>
+              <section className={`py-8 px-6 w-full md:w-1/2 flex-1 ${isDarkMode ? "bg-stone-800 rounded-lg shadow-lg" : "bg-gray-100 rounded-lg shadow-lg"}`}>
                 <div className="container mx-auto text-left p-6">
                   <h3 className={`text-3xl font-semibold mb-4 transition-colors duration-300 ease-in-out ${isDarkMode ? "text-red-400" : "text-red-800"}`}>Daily Challenges</h3>
                   <ul className={`list-disc list-inside ${isDarkMode ? "text-white" : "text-stone-700"}`}>
