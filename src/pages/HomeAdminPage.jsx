@@ -9,7 +9,6 @@ function HomeAdminPage() {
   const { isDarkMode } = useContext(ThemeContext);
   const [quotes, setQuotes] = useState([""]);
   const [workoutDesc, setWorkoutDesc] = useState("");
-  const [warmupExercises, setWarmupExercises] = useState([""]);
   const [workoutSections, setWorkoutSections] = useState([
     { title: "Main Workout", exercises: [""] },
   ]);
@@ -38,16 +37,40 @@ function HomeAdminPage() {
           const data = homeDocSnap.data();
           setQuotes(data.quotes?.length ? data.quotes : [""]);
           setWorkoutDesc(data.currentWorkout?.description || "");
-          setWarmupExercises(
-            data.currentWorkout?.warmup?.length
-              ? data.currentWorkout.warmup
-              : [""]
+          // Combine fetched warmup and sections into workoutSections
+          const fetchedWorkoutSections = data.currentWorkout?.sections?.length
+            ? data.currentWorkout.sections
+            : [];
+
+          const fetchedWarmup = data.currentWorkout?.warmup?.length
+            ? data.currentWorkout.warmup
+            : [];
+
+          // Create a Warm Up section if warmup exercises exist and no Warm Up section is present in sections
+          const existingWarmupSectionIndex = fetchedWorkoutSections.findIndex(
+            section => section.title === "Warm Up"
           );
-          setWorkoutSections(
-            data.currentWorkout?.sections?.length
-              ? data.currentWorkout.sections
-              : [{ title: "Main Workout", exercises: [""] }]
-          );
+
+          if (fetchedWarmup.length > 0 && existingWarmupSectionIndex === -1) {
+            // Add a new Warm Up section with fetched warmup exercises at the beginning
+            setWorkoutSections([
+              { title: "Warm Up", exercises: fetchedWarmup },
+              ...fetchedWorkoutSections
+            ]);
+          } else if (fetchedWarmup.length > 0 && existingWarmupSectionIndex !== -1) {
+            // Update existing Warm Up section with fetched warmup exercises
+            const updatedSections = [...fetchedWorkoutSections];
+            updatedSections[existingWarmupSectionIndex].exercises = fetchedWarmup;
+            setWorkoutSections(updatedSections);
+          }
+          else if (fetchedWorkoutSections.length > 0) {
+            // If no warmup exercises, but sections exist, just set sections
+            setWorkoutSections(fetchedWorkoutSections);
+          }
+          else {
+            // Default state if no workout data exists
+            setWorkoutSections([{ title: "Main Workout", exercises: [""] }]);
+          }
           setScheduledWorkouts(
             data.scheduledWorkouts?.length
               ? data.scheduledWorkouts.map((workout) => {
@@ -95,7 +118,6 @@ function HomeAdminPage() {
       quotes: quotes.filter((quote) => quote.trim() !== ""),
       currentWorkout: {
         description: workoutDesc,
-        warmup: warmupExercises.filter((exercise) => exercise.trim() !== ""),
         sections: workoutSections
           .filter(
             (section) =>
@@ -165,15 +187,6 @@ function HomeAdminPage() {
     setQuotes(newQuotes);
   };
 
-  const addWarmupExercise = () => setWarmupExercises([...warmupExercises, ""]);
-  const removeWarmupExercise = (index) =>
-    setWarmupExercises(warmupExercises.filter((_, i) => i !== index));
-  const updateWarmupExercise = (index, value) => {
-    const newExercises = [...warmupExercises];
-    newExercises[index] = value;
-    setWarmupExercises(newExercises);
-  };
-
   const addWorkoutSection = () =>
     setWorkoutSections([...workoutSections, { title: "", exercises: [""] }]);
   const removeWorkoutSection = (index) =>
@@ -218,23 +231,40 @@ function HomeAdminPage() {
 
   // Convert UTC ISO string to EST (UTC-5) for datetime-local format (YYYY-MM-DDThh:mm)
   const toESTDateTimeString = (isoString) => {
+    console.log('toESTDateTimeString received isoString:', isoString); // Log input ISO string
     if (!isoString) return "";
-    const date = new Date(isoString);
-    // EST is UTC-5, so subtract 5 hours (5 * 60 * 60 * 1000 milliseconds)
-    const estDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
-    return estDate.toISOString().slice(0, 16);
+    const date = new Date(isoString); // Parses the UTC ISO string
+    console.log('toESTDateTimeString parsed UTC date object:', date); // Log the Date object after parsing UTC string
+    // Get the time in the user's local time zone
+    const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    console.log('toESTDateTimeString calculated localDate object:', localDate); // Log the calculated local Date object
+
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    const hours = String(localDate.getHours()).padStart(2, '0');
+    const minutes = String(localDate.getMinutes()).padStart(2, '0');
+
+    const formattedString = `${year}-${month}-${day}T${hours}:${minutes}`;
+    console.log('toESTDateTimeString returning formatted string:', formattedString); // Log the final formatted string
+    return formattedString;
   };
 
   const updateScheduledWorkout = (index, field, value) => {
+    console.log('updateScheduledWorkout received value:', value); // Log the input value from datetime-local
     const newScheduledWorkouts = [...scheduledWorkouts];
     if (field === "updateDateTime") {
-      // Treat the selected time as EST (UTC-5) and convert to UTC for storage
-      const estDate = new Date(value);
-      // Subtract 5 hours to convert EST to UTC
-      const utcDate = new Date(estDate.getTime() - 5 * 60 * 60 * 1000);
+      // Parse the local time from the input
+      const localDate = new Date(value); // This parses the input string in the user's local time zone
+      console.log('updateScheduledWorkout parsed localDate object:', localDate); // Log the Date object after parsing local string
+
+      // Convert local time to UTC for storage
+      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000); // Correctly calculate UTC from local time
+      console.log('updateScheduledWorkout calculated utcDate object:', utcDate); // Log the calculated UTC Date object
+
       newScheduledWorkouts[index][field] = utcDate.toISOString();
       console.log(
-        `Scheduled workout ${index} updateDateTime set to (UTC): ${newScheduledWorkouts[index][field]}`
+        `Scheduled workout ${index} updateDateTime set to (UTC ISO): ${newScheduledWorkouts[index][field]}` // Log the final UTC ISO string
       );
     } else {
       newScheduledWorkouts[index][field] = value;
@@ -305,6 +335,13 @@ function HomeAdminPage() {
     const newChallenges = [...dailyChallenges];
     newChallenges[index] = value;
     setDailyChallenges(newChallenges);
+  };
+
+  // Handle date/time change
+  const handleDateTimeChange = (e) => {
+    const localDateTimeValue = e.target.value;
+    console.log('HomeAdminPage.jsx: Raw local datetime input value:', localDateTimeValue);
+    // ... existing code ...
   };
 
   return (
@@ -389,124 +426,72 @@ function HomeAdminPage() {
 
       <div className="mb-6">
         <h3
-          className={`text-xl transition-colors duration-300 ease-in-out ${
-            isDarkMode ? "text-red-400" : "text-red-800"
-          } mb-2`}
+          className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-red-400' : 'text-red-800'}`}
         >
-          Current Workout of the Day
+          Current Workout
         </h3>
-        <textarea
-          value={workoutDesc}
-          onChange={(e) => setWorkoutDesc(e.target.value)}
-          className={`border p-2 w-full h-24 ${
-            isDarkMode
-              ? "bg-stone-700 border-stone-600 text-white"
-              : "bg-white border-red-300 text-red-600"
-          }`}
-          placeholder="Current workout description"
-        />
+        <div className={`p-4 rounded ${isDarkMode ? 'bg-stone-700' : 'bg-stone-200'}`}>
+          <label htmlFor="workoutDesc" className="block text-lg font-semibold mb-2">Description:</label>
+          <input
+            type="text"
+            id="workoutDesc"
+            value={workoutDesc}
+            onChange={(e) => setWorkoutDesc(e.target.value)}
+            className={`border p-2 w-full mb-4 ${isDarkMode ? 'bg-stone-600 border-stone-500 text-white' : 'bg-white border-stone-300 text-stone-700'}`}
+          />
 
-        <h4
-          className={`text-lg transition-colors duration-300 ease-in-out ${
-            isDarkMode ? "text-blue-300" : "text-blue-600"
-          } mt-4 mb-2`}
-        >
-          Warm Up Exercises
-        </h4>
-        {warmupExercises.map((exercise, index) => (
-          <div key={`warmup-${index}`} className="flex mb-2">
-            <input
-              type="text"
-              value={exercise}
-              onChange={(e) => updateWarmupExercise(index, e.target.value)}
-              className={`border p-2 w-full mr-2 ${
-                isDarkMode
-                  ? "bg-stone-700 border-stone-600 text-white"
-                  : "bg-white border-red-300 text-red-600"
-              }`}
-              placeholder={`Warm Up ${index + 1}`}
-            />
-            <button
-              onClick={() => removeWarmupExercise(index)}
-              className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-              disabled={warmupExercises.length === 1}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-        <button
-          onClick={addWarmupExercise}
-          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2 mb-4"
-        >
-          Add Warm Up Exercise
-        </button>
-
-        {workoutSections.map((section, index) => (
-          <div key={`section-${index}`} className="mt-4">
-            <div className="flex items-center mb-2">
-              <input
-                type="text"
-                value={section.title}
-                onChange={(e) =>
-                  updateWorkoutSectionTitle(index, e.target.value)
-                }
-                className={`border p-2 w-full mr-2 ${
-                  isDarkMode
-                    ? "bg-stone-700 border-stone-600 text-white"
-                    : "bg-white border-red-300 text-red-600"
-                }`}
-                placeholder="Section Title (e.g., Strength, Conditioning)"
-              />
-              <button
-                onClick={() => removeWorkoutSection(index)}
-                className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-                disabled={workoutSections.length === 1}
-              >
-                Remove Section
-              </button>
-            </div>
-            {section.exercises.map((exercise, exIndex) => (
-              <div
-                key={`section-${index}-exercise-${exIndex}`}
-                className="flex mb-2"
-              >
+          {/* Workout Sections (including Warm Up if added as a section) */}
+          <h4 className={`text-xl font-semibold mt-4 mb-2 ${isDarkMode ? 'text-red-400' : 'text-red-800'}`}>Sections:</h4>
+          {workoutSections.map((section, sectionIndex) => (
+            <div key={sectionIndex} className={`p-4 mb-4 rounded ${isDarkMode ? 'bg-stone-600' : 'bg-stone-300'}`}>
+              <div className="flex justify-between items-center mb-2">
                 <input
                   type="text"
-                  value={exercise}
-                  onChange={(e) =>
-                    updateSectionExercise(index, exIndex, e.target.value)
-                  }
-                  className={`border p-2 w-full mr-2 ${
-                    isDarkMode
-                      ? "bg-stone-700 border-stone-600 text-white"
-                      : "bg-white border-red-300 text-red-600"
-                  }`}
-                  placeholder={`Exercise ${exIndex + 1}`}
+                  placeholder="Section Title (e.g., Warm Up, Main Workout)"
+                  value={section.title}
+                  onChange={(e) => updateWorkoutSectionTitle(sectionIndex, e.target.value)}
+                  className={`border p-2 w-3/4 ${isDarkMode ? 'bg-stone-700 border-stone-500 text-white' : 'bg-white border-stone-300 text-stone-700'}`}
                 />
                 <button
-                  onClick={() => removeSectionExercise(index, exIndex)}
-                  className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out"
-                  disabled={section.exercises.length === 1}
+                  onClick={() => removeWorkoutSection(sectionIndex)}
+                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors duration-300"
                 >
-                  Remove
+                  Remove Section
                 </button>
               </div>
-            ))}
-            <button
-              onClick={() => addSectionExercise(index)}
-              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-2"
-            >
-              Add Exercise
-            </button>
-          </div>
-        ))}
-        <button
-          onClick={addWorkoutSection}
-          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors duration-300 ease-in-out mt-4"
-        >
-          Add Workout Section
-        </button>
+              <h5 className={`text-md font-semibold mb-2 ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>Exercises:</h5>
+              {section.exercises.map((exercise, exerciseIndex) => (
+                <div key={exerciseIndex} className="flex items-center mb-2">
+                  <input
+                    type="text"
+                    placeholder="Exercise"
+                    value={exercise}
+                    onChange={(e) => updateSectionExercise(sectionIndex, exerciseIndex, e.target.value)}
+                    className={`border p-2 w-full mr-2 ${isDarkMode ? 'bg-stone-700 border-stone-500 text-white' : 'bg-white border-stone-300 text-stone-700'}`}
+                  />
+                  <button
+                    onClick={() => removeSectionExercise(sectionIndex, exerciseIndex)}
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors duration-300"
+                  >
+                    Remove Exercise
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => addSectionExercise(sectionIndex)}
+                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors duration-300 mt-2"
+              >
+                Add Exercise
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={addWorkoutSection}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors duration-300 mt-4"
+          >
+            Add New Section
+          </button>
+        </div>
       </div>
 
       <div className="mb-6">

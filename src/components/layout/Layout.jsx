@@ -4,6 +4,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { ThemeContext } from "../../App";
 import { AuthContext } from "../../context/AuthContext";
 import Navigation from "./Navigation";
+import Footer from './Footer';
 // Import social media icons from react-icons
 import {
   FaFacebook,
@@ -13,10 +14,14 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 
+console.log('Layout.jsx: Loading Layout component');
+
 const Layout = () => {
   const { isDarkMode } = useContext(ThemeContext);
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
+
+  console.log('Layout.jsx: Rendering Layout. Pathname:', location.pathname, 'User:', user ? 'Authenticated' : 'Not Authenticated');
 
   return (
     <div className={`${isDarkMode ? "dark" : ""}`}>
@@ -29,62 +34,7 @@ const Layout = () => {
           <Outlet />
         </main>
 
-        {/* Footer */}
-        <footer className="bg-red-800 text-white p-6 text-center">
-          <div className="mb-4">
-            {/* Social Media Icons */}
-            <div className="flex justify-center space-x-4">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-red-400 transition-colors duration-200"
-                aria-label="Facebook"
-              >
-                <FaFacebook size={24} />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-red-400 transition-colors duration-200"
-                aria-label="Twitter"
-              >
-                <FaTwitter size={24} />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-red-400 transition-colors duration-200"
-                aria-label="Instagram"
-              >
-                <FaInstagram size={24} />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-red-400 transition-colors duration-200"
-                aria-label="LinkedIn"
-              >
-                <FaLinkedin size={24} />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-red-400 transition-colors duration-200"
-                aria-label="YouTube"
-              >
-                <FaYoutube size={24} />
-              </a>
-            </div>
-          </div>
-          <p>
-            © {new Date().getFullYear()} Aussie Gut Pack. All rights reserved.
-          </p>
-        </footer>
+        <Footer />
       </div>
     </div>
   );
