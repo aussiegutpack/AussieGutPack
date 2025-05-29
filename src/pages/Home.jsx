@@ -436,7 +436,7 @@ function Home() {
               }`}
               style={{ minHeight: "400px" }} // Increased minHeight to ensure visibility
             >
-              <div className="container mx-auto text-center">
+              <div className="container mx-auto text-center max-w-screen-md">
                 <header>
                   <h1
                     className={`text-5xl md:text-6xl font-extrabold mb-4 transition-colors duration-300 ease-in-out ${
@@ -460,7 +460,7 @@ function Home() {
                       : "opacity-0 translate-y-10"
                   }`}
                 >
-                  <div className="md:w-1/2 p-6 flex flex-col justify-center">
+                  <div className="md:max-w-sm md:mx-auto p-6 flex flex-col justify-center">
                     <h2
                       className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
                         isDarkMode ? "text-red-400" : "text-red-800"
@@ -486,7 +486,7 @@ function Home() {
                       </Button>
                     </div>
                   </div>
-                  <div className="md:w-1/2 flex justify-center items-center">
+                  <div className="flex justify-center items-center">
                     <div className="h-80 w-80 md:h-[400px] md:w-[400px] overflow-hidden relative rounded-full">
                       <Background className="w-full h-full object-cover" />
                     </div>
@@ -509,7 +509,7 @@ function Home() {
               style={{ minHeight: "400px" }} // Increased minHeight to ensure visibility
             >
               <div
-                className={`container mx-auto text-center transition-all duration-700 ease-in-out ${
+                className={`container mx-auto text-center transition-all duration-700 ease-in-out max-w-screen-md ${
                   isRoofVisible
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-10"
@@ -559,9 +559,9 @@ function Home() {
                   </AnimatePresence>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div className="flex flex-col md:flex-row gap-8 mx-auto px-6 max-w-xl">
                   <section
-                    className="workout-section"
+                    className="workout-section max-w-xs mx-auto md:flex-grow-0 md:flex-shrink-0 md:basis-1/2 md:w-80"
                     aria-labelledby="workout-heading"
                   >
                     <h3
@@ -664,7 +664,7 @@ function Home() {
                     </Button>
                   </section>
                   <section
-                    className="challenges-section"
+                    className={`challenges-section py-8 px-4 sm:px-6 bg-stone-800 rounded-lg shadow-lg box-border max-w-xs mx-auto overflow-x-hidden md:flex-grow-0 md:flex-shrink-0 md:basis-1/2 md:w-80`}
                     aria-labelledby="challenges-heading"
                   >
                     <h3
@@ -677,7 +677,7 @@ function Home() {
                     </h3>
                     {content.dailyChallenges.length > 0 ? (
                       <ul
-                        className={`text-left list-none pl-6 mb-4 transition-colors duration-300 ease-in-out ${
+                        className={`text-left list-none mb-4 transition-colors duration-300 ease-in-out ${
                           isDarkMode ? "text-white" : "text-red-600"
                         }`}
                         role="list"
@@ -685,7 +685,7 @@ function Home() {
                         {content.dailyChallenges.map((challenge, index) => (
                           <li
                             key={`challenge-${index}`}
-                            className="mb-2 text-lg flex items-center"
+                            className="mb-2 text-lg flex items-center flex-wrap break-words"
                           >
                             <input
                               type="checkbox"
@@ -696,7 +696,7 @@ function Home() {
                               aria-label={`Mark challenge as completed: ${challenge}`}
                               aria-checked={completedChallenges.includes(index)}
                             />
-                            <label htmlFor={`challenge-${index}`}>
+                            <label htmlFor={`challenge-${index}`} className="break-words">
                               {challenge}
                             </label>
                           </li>
@@ -744,7 +744,7 @@ function Home() {
               }`}
               style={{ minHeight: "400px" }}
             >
-              <div className="container mx-auto text-center">
+              <div className="container mx-auto text-center max-w-screen-md">
                 <h2
                   className={`text-3xl font-bold mb-4 transition-colors duration-300 ease-in-out ${
                     isDarkMode ? "text-red-400" : "text-red-800"
@@ -762,14 +762,7 @@ function Home() {
                       {latestBlogPost.title}
                     </h3>
                     <p
-                      className={`text-sm mb-4 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      {new Date(latestBlogPost.date).toLocaleDateString()}
-                    </p>
-                    <p
-                      className={`text-lg mb-6 max-w-2xl mx-auto transition-colors duration-300 ease-in-out ${
+                      className={`text-lg mb-4 transition-colors duration-300 ease-in-out ${
                         isDarkMode ? "text-white" : "text-red-600"
                       }`}
                     >
@@ -778,7 +771,7 @@ function Home() {
                     <Button
                       to={`/blog/${latestBlogPost.id}`}
                       variant="primary"
-                      className={`mx-auto ${
+                      className={`mx-auto btn-primary ${
                         isDarkMode
                           ? "bg-red-800 text-white hover:bg-red-900"
                           : "bg-red-800 text-white hover:bg-red-900"
@@ -790,87 +783,14 @@ function Home() {
                   </article>
                 ) : (
                   <p
-                    className={`text-lg transition-colors duration-300 ease-in-out ${
+                    className={`text-lg mb-4 transition-colors duration-300 ease-in-out ${
                       isDarkMode ? "text-white" : "text-red-600"
                     }`}
                   >
                     No blog posts available.
                   </p>
                 )}
-                {upcomingBlogPost ? (
-                  <article>
-                    <h3
-                      className={`text-xl font-semibold mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-white" : "text-red-600"
-                      }`}
-                    >
-                      Upcoming: {upcomingBlogPost.title}
-                    </h3>
-                    <p
-                      className={`text-sm mb-2 transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      Coming on{" "}
-                      {new Date(upcomingBlogPost.date).toLocaleDateString()}
-                    </p>
-                    <p
-                      className={`text-lg mb-6 max-w-2xl mx-auto transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-white" : "text-red-600"
-                      }`}
-                    >
-                      {upcomingBlogPost.excerpt}
-                    </p>
-                    <p
-                      className={`text-sm italic transition-colors duration-300 ease-in-out ${
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      Stay tuned for this upcoming post!
-                    </p>
-                  </article>
-                ) : (
-                  <p
-                    className={`text-lg transition-colors duration-300 ease-in-out ${
-                      isDarkMode ? "text-white" : "text-red-600"
-                    }`}
-                  >
-                    No upcoming blog posts at this time.
-                  </p>
-                )}
               </div>
-            </section>
-
-            <hr
-              className={`my-12 ${
-                isDarkMode ? "border-stone-700" : "border-stone-300"
-              }`}
-            />
-
-            <section
-              className={`py-8 ${
-                isDarkMode ? "bg-stone-800" : "bg-stone-100"
-              } text-center`}
-            >
-              <p
-                className={`text-lg mb-4 ${
-                  isDarkMode ? "text-white" : "text-red-600"
-                }`}
-              >
-                Want more? Sign up with us today!
-              </p>
-              <Button
-                to="/login"
-                variant="primary"
-                className={`${
-                  isDarkMode
-                    ? "bg-red-800 text-white hover:bg-red-900"
-                    : "bg-red-800 text-white hover:bg-red-900"
-                }`}
-                aria-label="Sign up for Aussie Gut Pack"
-              >
-                Sign Up
-              </Button>
             </section>
           </>
         )}
